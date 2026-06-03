@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 10 10 11;
+  --foreground: 245 245 247;
+}
+
+.light {
+  --background: 250 250 252;
+  --foreground: 17 17 19;
+}
+
+@layer base {
+  * {
+    @apply border-white/10;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-[rgb(var(--background))] text-[rgb(var(--foreground))] antialiased;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+  /* Custom scrollbar (dark-friendly). */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-white/15;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-white/25;
+  }
+  ::selection {
+    @apply bg-brand-pink/40 text-white;
+  }
+}
+
+@layer components {
+  /* Reusable gradient text. */
+  .text-gradient {
+    @apply bg-gradient-to-r from-brand-pink via-fuchsia-500 to-brand-cyan bg-clip-text text-transparent;
+  }
+  /* Frosted card surface. */
+  .surface {
+    @apply rounded-2xl border border-white/10 bg-brand-card/80 backdrop-blur-sm;
+  }
+  .surface-hover {
+    @apply transition-all duration-300 hover:border-brand-pink/40 hover:shadow-glow;
+  }
+  /* Loading skeleton shimmer. */
+  .skeleton {
+    @apply relative overflow-hidden bg-white/5;
+  }
+  .skeleton::after {
+    @apply absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/10 to-transparent;
+    content: '';
+  }
+}
+
+/* Respect reduced-motion preferences. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
