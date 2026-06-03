@@ -1,45 +1,36 @@
 import type { Metadata } from 'next';
-import { Suspense } from 'react';
-import { queryVideos } from '@/lib/services/videoService';
+import { siteConfig } from '@/config/site';
 import { Section } from '@/components/ui/Section';
-import { InfiniteVideoFeed } from '@/components/video/InfiniteVideoFeed';
-import { SearchBar } from '@/components/search/SearchBar';
+import { TikTokCreatorEmbed } from '@/components/video/TikTokCreatorEmbed';
 
 export const metadata: Metadata = {
-  title: 'Legújabb videók',
+  title: 'Élő TikTok feed',
   description:
-    'Vadász Gyula legújabb TikTok videói egy helyen — automatikusan frissülő lista, végtelen görgetéssel.',
+    'Vadász Gyula legújabb TikTok videói élőben, a TikTok hivatalos beágyazásán keresztül — mindig naprakészen.',
   alternates: { canonical: '/latest' },
 };
 
-export const revalidate = 600;
-
-export default async function LatestPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ q?: string }>;
-}) {
-  const { q } = await searchParams;
-  const search = q?.trim() || undefined;
-  const initial = await queryVideos({ sort: 'recent', search, limit: 8 });
-
+export default function LatestPage() {
   return (
     <Section
-      title={search ? <>Keresés: „{search}&rdquo;</> : <>🆕 Legújabb videók</>}
-      subtitle={
-        search
-          ? `${initial.total} találat a videók, feliratok és kulcsszavak között.`
-          : 'A legfrissebb feltöltések — görgess a többiért.'
-      }
+      title={<>🆕 Élő TikTok feed</>}
+      subtitle="Vadász Gyula legfrissebb videói közvetlenül a TikTokról, a hivatalos lejátszón keresztül."
     >
-      <div className="mb-8 max-w-xl">
-        <Suspense fallback={null}>
-          <SearchBar />
-        </Suspense>
-      </div>
+      <TikTokCreatorEmbed handle={siteConfig.creatorHandle} />
 
-      {/* `key` forces the feed to reset when the search term changes. */}
-      <InfiniteVideoFeed key={search ?? 'all'} initial={initial} sort="recent" search={search} />
+      <p className="mx-auto mt-8 max-w-2xl text-center text-sm text-brand-muted">
+        A feed a TikTok hivatalos beágyazását használja. Ha nem töltődik be (pl.
+        sütik letiltása miatt), nyisd meg közvetlenül:{' '}
+        <a
+          href={siteConfig.tiktokUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-medium text-brand-cyan hover:underline"
+        >
+          @{siteConfig.creatorHandle} a TikTokon
+        </a>
+        .
+      </p>
     </Section>
   );
 }

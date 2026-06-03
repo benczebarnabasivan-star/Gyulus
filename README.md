@@ -1,278 +1,125 @@
 # Vadász Gyula — Rajongói Oldal 🤠
 
-A modern, reszponzív rajongói weboldal a magyar TikTokos **Vadász Gyula**
-([@vadasz_gyula](https://www.tiktok.com/@vadasz_gyula)) legviccesebb és
-legújabb videóinak. Sötét, TikTok-ihlette dizájn, magyar nyelvű felület,
-gyors betöltés és PWA-támogatás.
+Modern, reszponzív **rajongói weboldal** a magyar TikTokos **Vadász Gyula**
+([@vadasz_gyula](https://www.tiktok.com/@vadasz_gyula)) videóinak. Sötét,
+TikTok-ihlette dizájn, magyar nyelvű felület, PWA-támogatás.
 
 > **Nem hivatalos rajongói oldal.** Nem áll kapcsolatban a TikTokkal vagy a
 > tartalom-készítővel. Minden videó és védjegy a jogtulajdonosokat illeti.
 
----
+## 🎬 Hogyan jelenik meg a tartalom (fontos!)
+
+A site **kizárólag valódi TikTok tartalmat** mutat, a **TikTok hivatalos
+beágyazásain** keresztül — API-kulcs és scraping nélkül, a platform
+feltételeit tiszteletben tartva:
+
+- **Élő feed** (`/latest`) — a TikTok hivatalos **creator embed** widgetje
+  (`embed.js`) rendereli Vadász Gyula legfrissebb videóit, élőben.
+- **Kiemelt / válogatott klipek** — a [TikTok oEmbed](https://developers.tiktok.com/doc/embed-videos)
+  hivatalos, publikus végpontjáról kapott **valódi** felirat + bélyegkép +
+  lejátszó. A megjelenő videókat a `src/lib/data/realVideos.ts` lista vezérli.
+- **Nincsenek kitalált statisztikák.** Megtekintés/kedvelés számokat és
+  feltöltési dátumokat NEM jelenítünk meg, mert ezek harmadik fél
+  alkotójához az ő engedélye nélkül nem szerezhetők meg — és nem találunk ki
+  ilyet. A számok a TikTokon érhetők el.
+- Az **idézetek** és az **idővonal** egyértelműen jelölt **rajongói**
+  tartalom (illusztratív).
+
+### Új videó hozzáadása
+Vedd fel a videó TikTok azonosítóját a `src/lib/data/realVideos.ts` fájlba.
+Csak a hiteles `@vadasz_gyula` fiók videóit add hozzá. A rendszer
+automatikusan ellenőrzi oEmbeddel; a privát/törölt videók kimaradnak.
 
 ## ✨ Funkciók
 
-- **Hero szekció** animált háttérrel, profillal és statisztikákkal
-- **Legújabb videók** végtelen görgetéssel (`IntersectionObserver`)
-- **Legviccesebb klipek** rendezéssel (közönségkedvenc / nézettség / kedvelés)
-- **Felkapott** szekció (legnézettebb / legmegosztottabb / legkommentáltabb)
-- **Keresés** feliratokban, kulcsszavakban és kategóriákban
-- **Videó részletoldal** lite-embed lejátszóval, statisztikákkal, kapcsolódó
-  videókkal és megosztással
-- **Idézetek** megosztható kártyákon
-- **Idővonal** a creator mérföldköveiről (animált)
+- Animált **hero** szekció és profil
+- **Élő TikTok feed** (hivatalos creator embed)
+- **Válogatott klipek** valódi videókból (hivatalos lejátszó, lite-embed)
+- **Videó részletoldal** valódi felirattal, beágyazott lejátszóval, megosztással
+- **Idézetek** és animált **idővonal** (rajongói tartalom)
 - **Közösség**: szavazások, beküldési űrlap, rajongói fal
-- **Admin felület**: beküldések moderálása, gyorsítótár frissítése
-- **SEO**: dinamikus metaadatok, JSON-LD (VideoObject + ProfilePage),
-  `sitemap.xml`, `robots.txt`, generált OG/Twitter képek
-- **PWA**: telepíthető, offline támogatás (service worker)
-- **Sötét/világos téma**, mobil-első reszponzív dizájn, `prefers-reduced-motion`
-- **Teljesítmény**: kép-lazy-loading, kódoptimalizálás, gyorsítótárazás,
-  loading skeletonok, hibakezelés
-
----
+- **Admin** moderációs felület (shared-secret belépés)
+- **SEO**: dinamikus metaadatok, JSON-LD, `sitemap.xml`, `robots.txt`,
+  generált OG/Twitter képek
+- **PWA**: manifest + service worker + offline oldal
+- Sötét/világos téma, mobil-első dizájn, loading skeletonok, hibahatárok
 
 ## 🧱 Tech stack
 
-| Réteg        | Technológia                                    |
-| ------------ | ---------------------------------------------- |
-| Keretrendszer| Next.js 15 (App Router, RSC)                   |
-| Nyelv        | TypeScript (strict)                            |
-| Stílus       | Tailwind CSS 3                                 |
-| Animáció     | Framer Motion                                  |
-| Ikonok       | lucide-react                                   |
-| Téma         | next-themes (osztály-alapú dark mode)          |
-| Adatbázis    | PostgreSQL + Prisma (perzisztens funkciókhoz)  |
-| Konténer     | Docker + docker-compose                        |
+Next.js 15 (App Router/RSC) · TypeScript (strict) · Tailwind CSS ·
+Framer Motion · next-themes · lucide-react · (opcionális) Prisma + PostgreSQL
+a közösségi/admin funkciókhoz · Docker.
 
----
-
-## 📁 Mappaszerkezet
+## 📁 Mappaszerkezet (lényeg)
 
 ```
-Gyulus/
-├── prisma/
-│   ├── schema.prisma          # Prisma adatmodell (PostgreSQL)
-│   └── seed.ts                # Adatbázis feltöltő script
-├── db/
-│   └── schema.sql             # Nyers SQL séma (Prisma alternatíva)
-├── public/
-│   ├── icon.svg               # PWA / favicon ikon
-│   ├── icon-maskable.svg      # PWA maskable ikon
-│   ├── avatar-placeholder.svg # Profilkép helyőrző
-│   └── sw.js                  # Service worker (offline)
-├── src/
-│   ├── app/
-│   │   ├── layout.tsx         # Gyökér layout (téma, navbar, footer, JSON-LD)
-│   │   ├── page.tsx           # Kezdőlap
-│   │   ├── globals.css
-│   │   ├── loading.tsx        # Route-szintű loading skeleton
-│   │   ├── error.tsx          # Hibahatár
-│   │   ├── not-found.tsx      # 404
-│   │   ├── opengraph-image.tsx# Generált OG kép
-│   │   ├── sitemap.ts         # Dinamikus sitemap
-│   │   ├── robots.ts          # robots.txt
-│   │   ├── manifest.ts        # PWA manifest
-│   │   ├── icon.svg           # Favicon (app convention)
-│   │   ├── latest/page.tsx    # /latest
-│   │   ├── funny/page.tsx     # /funny
-│   │   ├── trending/page.tsx  # /trending
-│   │   ├── about/page.tsx     # /about
-│   │   ├── community/page.tsx # /community
-│   │   ├── admin/page.tsx     # /admin (moderáció)
-│   │   ├── offline/page.tsx   # PWA offline fallback
-│   │   ├── video/[id]/page.tsx# Videó részletoldal (SSG)
-│   │   └── api/
-│   │       ├── videos/route.ts       # Lista + szűrés + lapozás
-│   │       ├── search/route.ts       # Keresés
-│   │       ├── submissions/route.ts  # Közösségi beküldések (CRUD)
-│   │       └── admin/
-│   │           ├── login/route.ts    # Admin belépés
-│   │           └── refresh/route.ts  # Gyorsítótár ürítése
-│   ├── components/
-│   │   ├── layout/            # Navbar, Footer
-│   │   ├── providers/         # ThemeProvider, ServiceWorkerRegister
-│   │   ├── home/              # Hero
-│   │   ├── video/             # VideoCard, VideoGrid, InfiniteVideoFeed,
-│   │   │                      #   VideoPlayer, SortTabs
-│   │   ├── search/            # SearchBar
-│   │   ├── quotes/            # QuoteCard
-│   │   ├── timeline/          # Timeline
-│   │   ├── community/         # PollCard, SubmissionForm
-│   │   └── ui/                # Section, Badge, Skeleton, ShareButtons, ThemeToggle
-│   ├── lib/
-│   │   ├── data/              # Seed adatok (creator, videos, quotes, timeline)
-│   │   ├── services/          # videoService, tiktok adapter, submissionStore
-│   │   ├── db.ts              # Prisma singleton
-│   │   ├── seo.ts             # Metaadat + JSON-LD helperek
-│   │   └── utils.ts           # Formázók (szám, dátum, idő)
-│   ├── config/
-│   │   └── site.ts            # Branding, navigáció, SEO kulcsszavak
-│   └── types/
-│       └── index.ts           # Megosztott típusok
-├── Dockerfile
-├── docker-compose.yml
-├── next.config.mjs
-├── tailwind.config.ts
-└── .env.example
+src/
+├── app/
+│   ├── page.tsx            # Kezdőlap
+│   ├── latest/             # Élő TikTok feed (creator embed)
+│   ├── funny/              # Válogatott valódi klipek
+│   ├── video/[id]/         # Videó részletoldal (valódi embed)
+│   ├── about/ community/ admin/ offline/
+│   ├── api/
+│   │   ├── submissions/    # Közösségi beküldések (CRUD)
+│   │   └── admin/          # login + cache refresh
+│   ├── sitemap.ts robots.ts manifest.ts opengraph-image.tsx
+│   └── layout.tsx globals.css
+├── components/
+│   ├── video/  TikTokCreatorEmbed · TikTokVideoEmbed · RealVideoCard
+│   ├── home/ quotes/ timeline/ community/ layout/ providers/ ui/
+├── lib/
+│   ├── data/      creator · realVideos · quotes · timeline
+│   ├── services/  videoService · oembed
+│   └── seo.ts utils.ts
+├── config/site.ts
+└── types/index.ts
 ```
-
----
-
-## 🗄️ Adatbázis séma
-
-PostgreSQL, a következő táblákkal (lásd `prisma/schema.prisma` és `db/schema.sql`):
-
-- **`videos`** — videók metaadatai (caption, slug, thumbnail, feltöltés, kulcsszavak, flagek)
-- **`categories`** + **`category_on_video`** — kategóriák (M:N)
-- **`statistics`** — nézettség, kedvelés, komment, megosztás, `funny_score`
-- **`featured_clips`** — kiemelt klipek sorrenddel
-- **`community_votes`** — közösségi szavazatok (anonim fingerprint alapján)
-- **`submissions`** — közösségi beküldések moderációs státusszal
-
----
-
-## 🔌 API architektúra
-
-Az alkalmazás egy **lecserélhető adatréteget** használ
-(`src/lib/services/videoService.ts`), amely egységes felületet ad a UI-nak,
-függetlenül attól, hogy az adat honnan jön:
-
-```
-UI / oldalak ──► videoService ──► [ seed adat | TikTok adapter | Prisma/DB ]
-                      │
-                      ├─ gyorsítótár (TTL alapú, in-memory)
-                      └─ szűrés / keresés / rendezés / lapozás
-```
-
-**TikTok adapter** (`src/lib/services/tiktok.ts`) — három üzemmód a
-`TIKTOK_DATA_SOURCE` env változóval:
-
-| Érték      | Forrás                                                              |
-| ---------- | ------------------------------------------------------------------ |
-| `seed`     | Beépített, kurált mintaadat (alapértelmezett, hálózat nélkül)      |
-| `official` | TikTok Display API (engedélyezett access token szükséges)          |
-| `rapidapi` | Harmadik féltől származó TikTok scraper (RapidAPI)                  |
-
-> ⚠️ **Megjegyzés a TikTok adatokról.** A TikTok hivatalos API-ja korlátozott
-> (app-jóváhagyás + felhasználói hozzájárulás szükséges), és a direkt scraping
-> a platform feltételeibe ütközhet. Ezért az oldal alapból egy **kurált
-> mintaadat-készlettel** működik, így azonnal használható. A megjelenített
-> statisztikák **illusztratívak**, amíg élő forrást nem konfigurálsz. Ha
-> integrálsz egy forrást, **agresszív gyorsítótárazással** kerüld a túl gyakori
-> lekéréseket (`TIKTOK_CACHE_TTL`), és tartsd be a platform feltételeit.
-
-### REST végpontok
-
-| Metódus | Útvonal                  | Leírás                                     |
-| ------- | ------------------------ | ------------------------------------------ |
-| GET     | `/api/videos`            | Lista (sort, funny, featured, q, category, cursor, limit) |
-| GET     | `/api/search?q=`         | Keresés (caption / kulcsszó / kategória)   |
-| GET/POST| `/api/submissions`       | Beküldések listája / létrehozása           |
-| PATCH   | `/api/submissions`       | Moderáció (admin token szükséges)          |
-| POST    | `/api/admin/login`       | Admin belépés (shared secret)              |
-| POST    | `/api/admin/refresh`     | Videó-gyorsítótár ürítése (admin)          |
-
----
 
 ## 🚀 Helyi futtatás
 
 ```bash
-# 1. Függőségek
 npm install
-
-# 2. Környezeti változók
-cp .env.example .env        # alapból TIKTOK_DATA_SOURCE=seed
-
-# 3. Fejlesztői szerver
-npm run dev                 # http://localhost:3000
+cp .env.example .env       # nincs szükség TikTok kulcsra
+npm run dev                # http://localhost:3000
 ```
 
-Adatbázis nélkül is teljesen működik (seed mód). A perzisztens funkciókhoz:
+A site adatbázis és kulcs nélkül is teljesen működik.
 
-```bash
-# PostgreSQL (pl. dockerrel)
-docker compose up -d db
-
-npm run prisma:generate
-npm run prisma:migrate      # vagy: npx prisma db push
-npm run db:seed             # mintaadatok betöltése
-```
-
-### Hasznos scriptek
-
-| Script                  | Leírás                       |
-| ----------------------- | ---------------------------- |
-| `npm run dev`           | Fejlesztői szerver           |
-| `npm run build`         | Produkciós build             |
-| `npm run start`         | Produkciós szerver           |
-| `npm run lint`          | ESLint                       |
-| `npm run typecheck`     | TypeScript ellenőrzés        |
-| `npm run db:seed`       | Adatbázis feltöltése         |
-
----
+| Script              | Leírás                |
+| ------------------- | --------------------- |
+| `npm run dev`       | Fejlesztői szerver    |
+| `npm run build`     | Produkciós build      |
+| `npm run start`     | Produkciós szerver    |
+| `npm run lint`      | ESLint                |
+| `npm run typecheck` | TypeScript ellenőrzés |
 
 ## 🐳 Docker
 
-A teljes stack (app + PostgreSQL) egy paranccsal:
-
 ```bash
-docker compose up --build
-# App:      http://localhost:3000
-# Postgres: localhost:5432  (gyulus / gyulus)
+docker compose up --build   # app + (opcionális) PostgreSQL
 ```
 
-A `Dockerfile` többlépcsős build-et használ a kis image-méretért.
+## 🌍 Telepítés (Vercel)
 
----
-
-## 🌍 Telepítés (Vercel / önállóan)
-
-**Vercel (ajánlott):**
-
-1. Push a GitHub repóba, importáld a Vercelre.
-2. Állítsd be a környezeti változókat (lásd `.env.example`).
+1. Push a GitHub repóba, importáld a [Vercel](https://vercel.com)-re.
+2. Állítsd be a `NEXT_PUBLIC_SITE_URL`-t a valós domainre.
 3. Deploy — a `next build` automatikusan lefut.
-
-**Önálló (Node/Docker):**
-
-```bash
-npm run build && npm run start   # vagy: docker compose up --build
-```
-
-Állítsd be a `NEXT_PUBLIC_SITE_URL`-t a valós domainre a helyes SEO/OG-hez.
-
----
 
 ## 🔐 Környezeti változók
 
-Lásd `.env.example`. Legfontosabbak:
+Lásd `.env.example`:
 
-| Változó                | Leírás                                             |
-| ---------------------- | -------------------------------------------------- |
-| `NEXT_PUBLIC_SITE_URL` | Publikus URL (SEO, sitemap, OG)                    |
-| `DATABASE_URL`         | PostgreSQL kapcsolat (Prisma)                      |
-| `TIKTOK_DATA_SOURCE`   | `seed` \| `official` \| `rapidapi`                 |
-| `TIKTOK_USERNAME`      | `vadasz_gyula`                                     |
-| `TIKTOK_CACHE_TTL`     | Gyorsítótár élettartam (mp)                        |
-| `ADMIN_PASSWORD`       | Admin felület jelszava                             |
+| Változó                | Leírás                                  |
+| ---------------------- | --------------------------------------- |
+| `NEXT_PUBLIC_SITE_URL` | Publikus URL (SEO, sitemap, OG)         |
+| `TIKTOK_USERNAME`      | `vadasz_gyula`                          |
+| `TIKTOK_CACHE_TTL`     | oEmbed gyorsítótár (mp)                 |
+| `DATABASE_URL`         | (opcionális) PostgreSQL a közösséghez   |
+| `ADMIN_PASSWORD`       | Admin felület jelszava                  |
 
----
+## 📄 Jogi megjegyzés
 
-## ⚡ Teljesítmény & SEO
-
-- React Server Components + SSG a videóoldalakhoz (`generateStaticParams`)
-- Kép-optimalizálás (`next/image`, AVIF/WebP), lazy loading
-- Lite-embed videólejátszó (a nehéz TikTok script csak kattintásra töltődik)
-- Gyorsítótárazás (Cache-Control + in-memory TTL)
-- Dinamikus metaadatok, JSON-LD strukturált adat, sitemap, robots
-- Cél kulcsszavak: _Vadász Gyula_, _Vadász Gyula TikTok_, _Vadász Gyula videók_,
-  _Vicces magyar TikTok videók_, _Magyar TikTok sztárok_
-
----
-
-## 📄 Licenc & jogi megjegyzés
-
-Ez egy közösségi, nem kereskedelmi rajongói projekt oktatási céllal. A creator
-neve, képmása és tartalmai a jogtulajdonost illetik. Élő adatforrás
-integrálásakor mindig tartsd be a TikTok felhasználási feltételeit.
+Közösségi, nem kereskedelmi rajongói projekt. A creator neve, képmása és
+tartalmai a jogtulajdonost illetik. A videók a TikTok hivatalos
+beágyazásain keresztül, az eredeti forrásból jelennek meg.

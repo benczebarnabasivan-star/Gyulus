@@ -2,18 +2,16 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Suspense, useState } from 'react';
+import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Menu, Search, X } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { navLinks, siteConfig } from '@/config/site';
 import { cn } from '@/lib/utils';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
-import { SearchBar } from '@/components/search/SearchBar';
 
 export function Navbar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-brand-dark/80 backdrop-blur-xl">
@@ -41,9 +39,7 @@ export function Navbar() {
                   href={link.href}
                   className={cn(
                     'relative rounded-full px-3.5 py-2 text-sm font-medium transition-colors',
-                    active
-                      ? 'text-white'
-                      : 'text-brand-muted hover:text-white',
+                    active ? 'text-white' : 'text-brand-muted hover:text-white',
                   )}
                 >
                   {active && (
@@ -62,13 +58,6 @@ export function Navbar() {
 
         {/* Actions */}
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => setSearchOpen((s) => !s)}
-            aria-label="Keresés"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/80 transition hover:bg-white/15"
-          >
-            <Search className="h-4 w-4" />
-          </button>
           <ThemeToggle />
           <a
             href={siteConfig.tiktokUrl}
@@ -87,24 +76,6 @@ export function Navbar() {
           </button>
         </div>
       </nav>
-
-      {/* Search drawer */}
-      <AnimatePresence>
-        {searchOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden border-t border-white/10"
-          >
-            <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-8">
-              <Suspense fallback={null}>
-                <SearchBar autoFocus onSubmitNavigate={() => setSearchOpen(false)} />
-              </Suspense>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Mobile menu */}
       <AnimatePresence>

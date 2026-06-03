@@ -3,12 +3,11 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Heart, PlayCircle, Sparkles, Users } from 'lucide-react';
+import { PlayCircle, Sparkles } from 'lucide-react';
 import type { Creator } from '@/types';
-import { formatCount } from '@/lib/utils';
 import { Badge } from '@/components/ui/Badge';
 
-/** Hero banner with animated gradient background + profile + stats. */
+/** Hero banner with animated gradient background + profile card. */
 export function Hero({ creator }: { creator: Creator }) {
   return (
     <section className="relative overflow-hidden">
@@ -44,35 +43,9 @@ export function Hero({ creator }: { creator: Creator }) {
           </h1>
           <p className="mt-4 max-w-lg text-lg text-brand-muted">{creator.bio}</p>
 
-          {/* Stats */}
-          <div className="mt-8 flex flex-wrap gap-6">
-            <div className="flex items-center gap-3">
-              <span className="grid h-11 w-11 place-items-center rounded-xl bg-brand-pink/15 text-brand-pink">
-                <Users className="h-5 w-5" />
-              </span>
-              <div>
-                <div className="text-xl font-bold">
-                  {creator.followers === null
-                    ? '—'
-                    : `~${formatCount(creator.followers)}`}
-                </div>
-                <div className="text-xs text-brand-muted">Követő</div>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="grid h-11 w-11 place-items-center rounded-xl bg-brand-cyan/15 text-brand-cyan">
-                <Heart className="h-5 w-5" />
-              </span>
-              <div>
-                <div className="text-xl font-bold">
-                  {creator.totalLikes === null
-                    ? '—'
-                    : `~${formatCount(creator.totalLikes)}`}
-                </div>
-                <div className="text-xs text-brand-muted">Összes kedvelés</div>
-              </div>
-            </div>
-          </div>
+          <p className="mt-4 text-sm text-brand-muted">
+            🎬 A videók közvetlenül a TikTokról, a hivatalos lejátszón keresztül.
+          </p>
 
           {/* CTAs */}
           <div className="mt-8 flex flex-wrap gap-3">
@@ -80,13 +53,13 @@ export function Hero({ creator }: { creator: Creator }) {
               href="/latest"
               className="inline-flex items-center gap-2 rounded-full bg-brand-pink px-6 py-3 font-semibold text-white shadow-glow transition hover:brightness-110"
             >
-              <PlayCircle className="h-5 w-5" /> Legújabb videók
+              <PlayCircle className="h-5 w-5" /> Élő TikTok feed
             </Link>
             <Link
               href="/funny"
               className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-6 py-3 font-semibold text-white transition hover:bg-white/10"
             >
-              😂 Legviccesebb klipek
+              😂 Válogatott klipek
             </Link>
           </div>
         </motion.div>

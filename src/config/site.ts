@@ -30,9 +30,8 @@ export const siteConfig = {
 
 export const navLinks = [
   { href: '/', label: 'Kezdőlap' },
-  { href: '/latest', label: 'Legújabb' },
-  { href: '/funny', label: 'Legviccesebb' },
-  { href: '/trending', label: 'Felkapott' },
+  { href: '/latest', label: 'Élő feed' },
+  { href: '/funny', label: 'Válogatott klipek' },
   { href: '/community', label: 'Közösség' },
   { href: '/about', label: 'Rólunk' },
 ] as const;

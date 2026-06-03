@@ -1,20 +1,16 @@
 import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Radio } from 'lucide-react';
 import { creator } from '@/lib/data/creator';
 import { quotes } from '@/lib/data/quotes';
 import { milestones } from '@/lib/data/timeline';
-import {
-  getFeatured,
-  getTrending,
-  queryVideos,
-} from '@/lib/services/videoService';
+import { getFeatured } from '@/lib/services/videoService';
 import { Hero } from '@/components/home/Hero';
 import { Section } from '@/components/ui/Section';
-import { VideoGrid } from '@/components/video/VideoGrid';
+import { RealVideoCard } from '@/components/video/RealVideoCard';
 import { QuoteCard } from '@/components/quotes/QuoteCard';
 import { Timeline } from '@/components/timeline/Timeline';
 
-// Revalidate the homepage hourly (data is cached upstream too).
+// Revalidate hourly so freshly-added videos / refreshed oEmbed data appear.
 export const revalidate = 3600;
 
 function MoreLink({ href, children }: { href: string; children: string }) {
@@ -29,43 +25,54 @@ function MoreLink({ href, children }: { href: string; children: string }) {
 }
 
 export default async function HomePage() {
-  const [featured, latest, trending] = await Promise.all([
-    getFeatured(4),
-    queryVideos({ sort: 'recent', limit: 8 }),
-    getTrending(4),
-  ]);
+  const featured = await getFeatured();
 
   return (
     <>
       <Hero creator={creator} />
 
+      {/* Live feed CTA */}
       <Section
-        title={<>😂 Legviccesebb klipek</>}
-        subtitle="A közönség kedvencei — a legtöbbet nevettető pillanatok."
-        action={<MoreLink href="/funny">Összes vicces</MoreLink>}
+        title={
+          <span className="flex items-center gap-2">
+            <Radio className="h-6 w-6 text-brand-pink" /> Élő TikTok feed
+          </span>
+        }
+        subtitle="Vadász Gyula legfrissebb videói közvetlenül a TikTokról, a hivatalos lejátszón keresztül — mindig naprakészen."
+        action={<MoreLink href="/latest">Teljes feed</MoreLink>}
       >
-        <VideoGrid videos={featured} />
+        <div className="surface flex flex-col items-center gap-4 p-8 text-center">
+          <p className="text-brand-muted">
+            A videók a TikTok hivatalos beágyazásával jelennek meg, így mindig a
+            legújabb tartalmakat látod.
+          </p>
+          <Link
+            href="/latest"
+            className="rounded-full bg-brand-pink px-6 py-3 font-semibold text-white shadow-glow transition hover:brightness-110"
+          >
+            Élő feed megnyitása
+          </Link>
+        </div>
       </Section>
 
-      <Section
-        title={<>🆕 Legújabb videók</>}
-        subtitle="Frissen feltöltött tartalmak, automatikusan frissülve."
-        action={<MoreLink href="/latest">Összes legújabb</MoreLink>}
-      >
-        <VideoGrid videos={latest.items.slice(0, 8)} />
-      </Section>
-
-      <Section
-        title={<>🔥 Most felkapott</>}
-        subtitle="A hónap legnézettebb videói."
-        action={<MoreLink href="/trending">Felkapott videók</MoreLink>}
-      >
-        <VideoGrid videos={trending} />
-      </Section>
+      {/* Featured verified videos */}
+      {featured.length > 0 && (
+        <Section
+          title={<>⭐ Kiemelt videók</>}
+          subtitle="Rajongói válogatás Vadász Gyula valódi videóiból (hivatalos TikTok lejátszó)."
+          action={<MoreLink href="/funny">Összes válogatott</MoreLink>}
+        >
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            {featured.map((v, i) => (
+              <RealVideoCard key={v.id} video={v} index={i} />
+            ))}
+          </div>
+        </Section>
+      )}
 
       <Section
         title={<>💬 Emlékezetes idézetek</>}
-        subtitle="A leghíresebb beszólások és mondatok."
+        subtitle="Rajongói válogatás — a kedvenc beszólások szellemében (nem szó szerinti idézetek)."
       >
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {quotes.slice(0, 3).map((q, i) => (
@@ -76,7 +83,7 @@ export default async function HomePage() {
 
       <Section
         title={<>📈 A sikertörténet</>}
-        subtitle="Vadász Gyula útja az első videótól a virális pillanatokig."
+        subtitle="Rajongói idővonal — illusztratív mérföldkövek."
       >
         <Timeline milestones={milestones} />
       </Section>

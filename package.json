@@ -11,7 +11,6 @@
     "typecheck": "tsc --noEmit",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "db:seed": "tsx prisma/seed.ts",
     "format": "prettier --write ."
   },
   "dependencies": {

@@ -30,7 +30,6 @@ services:
       NODE_ENV: production
       DATABASE_URL: postgresql://gyulus:gyulus@db:5432/gyulus?schema=public
       NEXT_PUBLIC_SITE_URL: http://localhost:3000
-      TIKTOK_DATA_SOURCE: seed
       TIKTOK_USERNAME: vadasz_gyula
     ports:
       - '3000:3000'

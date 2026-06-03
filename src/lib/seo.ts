@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { siteConfig } from '@/config/site';
-import type { Video } from '@/types';
+import type { SiteVideo } from '@/types';
 
 /** Build a fully-resolved absolute URL for the site. */
 export function absoluteUrl(path = ''): string {
@@ -44,29 +44,18 @@ export function buildDefaultMetadata(): Metadata {
   };
 }
 
-/** JSON-LD structured data for a single video (schema.org/VideoObject). */
-export function videoJsonLd(video: Video) {
+/** JSON-LD structured data for a single video (schema.org/VideoObject).
+ *  Only fields we can truthfully provide are included — no fabricated
+ *  view/like counts or upload dates. */
+export function videoJsonLd(video: SiteVideo) {
   return {
     '@context': 'https://schema.org',
     '@type': 'VideoObject',
     name: video.caption,
     description: video.caption,
-    thumbnailUrl: [video.thumbnailUrl],
-    uploadDate: video.uploadedAt,
+    ...(video.thumbnailUrl ? { thumbnailUrl: [video.thumbnailUrl] } : {}),
     contentUrl: video.url,
     embedUrl: video.url,
-    interactionStatistic: [
-      {
-        '@type': 'InteractionCounter',
-        interactionType: { '@type': 'WatchAction' },
-        userInteractionCount: video.stats.views,
-      },
-      {
-        '@type': 'InteractionCounter',
-        interactionType: { '@type': 'LikeAction' },
-        userInteractionCount: video.stats.likes,
-      },
-    ],
     creator: {
       '@type': 'Person',
       name: 'Vadász Gyula',

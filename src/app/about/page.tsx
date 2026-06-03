@@ -55,9 +55,9 @@ export default function AboutPage() {
             TikTokkal, sem közvetlenül a tartalom-készítővel.
           </p>
           <p className="text-sm">
-            ℹ️ A megjelenített statisztikák tájékoztató jellegűek. Az élő adatok
-            akkor jelennek meg, ha az oldal egy hivatalos vagy engedélyezett
-            adatforráshoz csatlakozik (lásd a projekt dokumentációját).
+            ℹ️ A videók a TikTok <strong>hivatalos beágyazásán</strong> keresztül
+            jelennek meg — így mindig a valódi, eredeti tartalmat látod. Az
+            idézetek és az idővonal rajongói válogatás, illusztratív jelleggel.
           </p>
         </div>
       </Section>
