@@ -1,0 +1,38 @@
+# ---------------------------------------------------------------------------
+# Local / self-hosted stack: Next.js app + PostgreSQL.
+# Usage:  docker compose up --build
+# ---------------------------------------------------------------------------
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: gyulus
+      POSTGRES_PASSWORD: gyulus
+      POSTGRES_DB: gyulus
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U gyulus']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://gyulus:gyulus@db:5432/gyulus?schema=public
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+      TIKTOK_USERNAME: vadasz_gyula
+    ports:
+      - '3000:3000'
+
+volumes:
+  postgres-data:
