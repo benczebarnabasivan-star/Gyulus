@@ -1,24 +1,27 @@
 import type { ReactNode } from 'react';
+
 import { cn } from '@/lib/utils';
 
-interface BadgeProps {
+type Props = {
   children: ReactNode;
-  variant?: 'default' | 'pink' | 'cyan' | 'outline';
+  tone?: 'neutral' | 'spot' | 'magenta' | 'cyan' | 'amber';
   className?: string;
-}
+};
 
-export function Badge({ children, variant = 'default', className }: BadgeProps) {
-  const variants = {
-    default: 'bg-white/10 text-white',
-    pink: 'bg-brand-pink/15 text-brand-pink',
-    cyan: 'bg-brand-cyan/15 text-brand-cyan',
-    outline: 'border border-white/20 text-white/80',
-  };
+const TONES = {
+  neutral: 'border-white/12 bg-white/[0.06] text-white/70',
+  spot: 'border-spot/35 bg-spot/12 text-spot',
+  magenta: 'border-magenta/35 bg-magenta/12 text-magenta',
+  cyan: 'border-cyan/35 bg-cyan/12 text-cyan',
+  amber: 'border-amber/35 bg-amber/12 text-amber',
+} as const;
+
+export function Badge({ children, tone = 'neutral', className }: Props) {
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium',
-        variants[variant],
+        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.12em]',
+        TONES[tone],
         className,
       )}
     >

@@ -1,20 +1,23 @@
 import Link from 'next/link';
-import { Home } from 'lucide-react';
+
+import { Aurora } from '@/components/visual/Aurora';
 
 export default function NotFound() {
   return (
-    <div className="mx-auto flex min-h-[60vh] max-w-md flex-col items-center justify-center px-4 text-center">
-      <p className="text-7xl font-black text-gradient">404</p>
-      <h1 className="mt-4 text-2xl font-bold">Ez a videó elszaladt 🏃‍♂️</h1>
-      <p className="mt-2 text-sm text-brand-muted">
-        A keresett oldal nem található. Nézz körül a legújabb videók között!
-      </p>
-      <Link
-        href="/"
-        className="mt-6 inline-flex items-center gap-2 rounded-full bg-brand-pink px-6 py-3 font-semibold text-white shadow-glow transition hover:brightness-110"
-      >
-        <Home className="h-5 w-5" /> Vissza a főoldalra
-      </Link>
+    <div className="relative isolate flex min-h-[70vh] items-center justify-center overflow-hidden px-5">
+      <Aurora palette={['#ff2d95', '#8b5cf6', '#22e4ff']} className="-z-10" />
+      <div className="text-center">
+        <div className="display text-[clamp(4rem,18vw,12rem)] uppercase leading-none text-gradient">
+          404
+        </div>
+        <p className="mt-4 text-lg text-white/60">That stage is not on the map.</p>
+        <Link
+          href="/festivals"
+          className="mt-8 inline-flex rounded-full bg-spot px-7 py-3.5 font-semibold text-black transition hover:brightness-110"
+        >
+          Browse festivals
+        </Link>
+      </div>
     </div>
   );
 }

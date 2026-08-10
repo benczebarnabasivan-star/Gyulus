@@ -2,25 +2,16 @@
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
-  // Image optimization: allow TikTok CDN + placeholder hosts.
-  // TikTok thumbnails are served from *.tiktokcdn.com hosts.
   images: {
+    // Spotify serves all artist/album/profile art from these CDNs.
     remotePatterns: [
-      { protocol: 'https', hostname: '**.tiktokcdn.com' },
-      { protocol: 'https', hostname: '**.tiktokcdn-us.com' },
-      { protocol: 'https', hostname: 'p16-sign-va.tiktokcdn.com' },
-      { protocol: 'https', hostname: 'images.unsplash.com' },
-      { protocol: 'https', hostname: 'picsum.photos' },
+      { protocol: 'https', hostname: 'i.scdn.co' },
+      { protocol: 'https', hostname: 'mosaic.scdn.co' },
+      { protocol: 'https', hostname: '*.fbcdn.net' },
     ],
     formats: ['image/avif', 'image/webp'],
-    // The avatar/illustration placeholders are SVGs; allow them through the
-    // optimizer with a strict CSP so no embedded scripts can execute.
-    dangerouslyAllowSVG: true,
-    contentSecurityPolicy:
-      "default-src 'self'; script-src 'none'; sandbox;",
   },
   experimental: {
-    // Optimize large icon package imports.
     optimizePackageImports: ['lucide-react', 'framer-motion'],
   },
   async headers() {
@@ -31,6 +22,7 @@ const nextConfig = {
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
         ],
       },
     ];

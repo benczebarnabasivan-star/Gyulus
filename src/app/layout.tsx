@@ -1,64 +1,46 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter, Sora } from 'next/font/google';
-import './globals.css';
-import { ThemeProvider } from '@/components/providers/ThemeProvider';
-import { Navbar } from '@/components/layout/Navbar';
+
 import { Footer } from '@/components/layout/Footer';
-import { ServiceWorkerRegister } from '@/components/providers/ServiceWorkerRegister';
-import { buildDefaultMetadata, personJsonLd } from '@/lib/seo';
+import { Navbar } from '@/components/layout/Navbar';
 
-// Variable fonts loaded via next/font (self-hosted, zero layout shift).
-const inter = Inter({
-  subsets: ['latin', 'latin-ext'],
-  variable: '--font-inter',
-  display: 'swap',
-});
-const sora = Sora({
-  subsets: ['latin', 'latin-ext'],
-  variable: '--font-display',
-  display: 'swap',
-});
+import './globals.css';
 
-export const metadata: Metadata = buildDefaultMetadata();
+export const metadata: Metadata = {
+  title: {
+    default: 'Resonance — your Spotify, your festival summer',
+    template: '%s · Resonance',
+  },
+  description:
+    'Connect Spotify to see what you actually listen to, then find the festivals your artists are playing — with the day, the stage and the set time.',
+  applicationName: 'Resonance',
+  openGraph: {
+    title: 'Resonance — your Spotify, your festival summer',
+    description:
+      'Festival recommendations built from your real listening history, down to individual set times.',
+    type: 'website',
+  },
+  robots: { index: true, follow: true },
+};
 
 export const viewport: Viewport = {
-  themeColor: '#0A0A0B',
+  themeColor: '#05040a',
   width: 'device-width',
   initialScale: 1,
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html
-      lang="hu"
-      className={`${inter.variable} ${sora.variable} dark`}
-      suppressHydrationWarning
-    >
-      <head>
-        {/* Person/Profile structured data */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd()) }}
-        />
-      </head>
-      <body className="min-h-dvh font-sans">
-        <ThemeProvider>
-          {/* Skip link for accessibility */}
-          <a
-            href="#main"
-            className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-brand-pink focus:px-4 focus:py-2 focus:text-white"
-          >
-            Ugrás a tartalomhoz
-          </a>
-          <Navbar />
-          <main id="main">{children}</main>
-          <Footer />
-          <ServiceWorkerRegister />
-        </ThemeProvider>
+    <html lang="en">
+      <body className="min-h-screen bg-ink-950">
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-spot focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-black"
+        >
+          Skip to content
+        </a>
+        <Navbar />
+        <main id="main">{children}</main>
+        <Footer />
       </body>
     </html>
   );

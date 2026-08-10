@@ -1,59 +1,79 @@
 import type { Config } from 'tailwindcss';
 
-/**
- * Tailwind configuration for the Vadász Gyula fan site.
- * Dark mode is class-based and enabled by default (see ThemeProvider).
- * The palette is TikTok-inspired: deep black backgrounds with the
- * signature TikTok pink (#FE2C55) and cyan (#25F4EE) accents.
- */
 const config: Config = {
-  darkMode: 'class',
-  content: [
-    './src/app/**/*.{ts,tsx}',
-    './src/components/**/*.{ts,tsx}',
-    './src/lib/**/*.{ts,tsx}',
-  ],
+  content: ['./src/**/*.{ts,tsx}'],
   theme: {
     extend: {
       colors: {
-        brand: {
-          pink: '#FE2C55',
-          cyan: '#25F4EE',
-          dark: '#0A0A0B',
-          card: '#161618',
-          muted: '#9A9AA0',
+        ink: {
+          950: '#05040a',
+          900: '#0a0812',
+          850: '#0f0c1a',
+          800: '#151024',
+          700: '#1e1733',
+          600: '#2a2047',
         },
+        spot: '#1ed760',
+        magenta: '#ff2d95',
+        cyan: '#22e4ff',
+        amber: '#ffb020',
+        violet: '#8b5cf6',
       },
       fontFamily: {
-        sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
-        display: ['var(--font-display)', 'system-ui', 'sans-serif'],
+        sans: [
+          'ui-sans-serif',
+          'system-ui',
+          '-apple-system',
+          'Segoe UI',
+          'Roboto',
+          'Helvetica Neue',
+          'Arial',
+          'sans-serif',
+        ],
+        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Consolas', 'monospace'],
       },
-      boxShadow: {
-        glow: '0 0 40px -8px rgba(254, 44, 85, 0.45)',
-        'glow-cyan': '0 0 40px -8px rgba(37, 244, 238, 0.4)',
+      letterSpacing: {
+        tightest: '-0.055em',
+      },
+      borderRadius: {
+        '4xl': '2rem',
+        '5xl': '2.75rem',
       },
       keyframes: {
-        'fade-up': {
-          '0%': { opacity: '0', transform: 'translateY(16px)' },
-          '100%': { opacity: '1', transform: 'translateY(0)' },
+        drift: {
+          '0%,100%': { transform: 'translate3d(0,0,0) scale(1)' },
+          '33%': { transform: 'translate3d(4%,-6%,0) scale(1.12)' },
+          '66%': { transform: 'translate3d(-5%,4%,0) scale(0.94)' },
         },
-        float: {
-          '0%, 100%': { transform: 'translateY(0)' },
-          '50%': { transform: 'translateY(-12px)' },
+        marquee: {
+          from: { transform: 'translateX(0)' },
+          to: { transform: 'translateX(-50%)' },
         },
-        'gradient-pan': {
-          '0%, 100%': { backgroundPosition: '0% 50%' },
-          '50%': { backgroundPosition: '100% 50%' },
+        eq: {
+          '0%,100%': { transform: 'scaleY(0.28)' },
+          '50%': { transform: 'scaleY(1)' },
         },
         shimmer: {
-          '100%': { transform: 'translateX(100%)' },
+          from: { backgroundPosition: '200% 0' },
+          to: { backgroundPosition: '-200% 0' },
+        },
+        pulseRing: {
+          '0%': { transform: 'scale(0.85)', opacity: '0.7' },
+          '100%': { transform: 'scale(1.6)', opacity: '0' },
+        },
+        floaty: {
+          '0%,100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-10px)' },
         },
       },
       animation: {
-        'fade-up': 'fade-up 0.6s ease-out both',
-        float: 'float 6s ease-in-out infinite',
-        'gradient-pan': 'gradient-pan 8s ease infinite',
-        shimmer: 'shimmer 1.6s infinite',
+        drift: 'drift 22s ease-in-out infinite',
+        'drift-slow': 'drift 34s ease-in-out infinite',
+        marquee: 'marquee 38s linear infinite',
+        eq: 'eq 900ms ease-in-out infinite',
+        shimmer: 'shimmer 2.4s linear infinite',
+        'pulse-ring': 'pulseRing 2.4s cubic-bezier(0.24,0.6,0.36,1) infinite',
+        floaty: 'floaty 6s ease-in-out infinite',
       },
     },
   },
