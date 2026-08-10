@@ -1,107 +1,76 @@
-'use client';
-
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { Menu, X } from 'lucide-react';
-import { navLinks, siteConfig } from '@/config/site';
-import { cn } from '@/lib/utils';
-import { ThemeToggle } from '@/components/ui/ThemeToggle';
 
-export function Navbar() {
-  const pathname = usePathname();
-  const [mobileOpen, setMobileOpen] = useState(false);
+import { ArtistAvatar } from '@/components/visual/ArtistAvatar';
+import { SpotifyButton } from '@/components/ui/SpotifyButton';
+import { siteConfig } from '@/config/site';
+import { isSpotifyConfigured } from '@/lib/spotify/auth';
+import { getTasteProfile } from '@/lib/spotify/session';
+
+const LINKS = [
+  { href: '/events', label: 'Gigs' },
+  { href: '/dashboard', label: 'For you' },
+];
+
+export async function Navbar() {
+  const taste = await getTasteProfile();
 
   return (
-    <header className="sticky top-0 z-50 border-b border-white/10 bg-brand-dark/80 backdrop-blur-xl">
-      <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 font-display">
-          <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-brand-pink to-brand-cyan text-lg font-black text-white">
-            VG
+    <header className="sticky top-0 z-50 border-b border-white/[0.07] bg-ink-950/70 backdrop-blur-xl">
+      <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-5 sm:px-8">
+        <Link href="/" className="group flex items-center gap-2.5">
+          <span className="relative flex h-8 w-8 items-center justify-center">
+            <span className="absolute inset-0 rounded-full bg-gradient-to-br from-spot via-cyan to-magenta opacity-90 transition group-hover:opacity-100" />
+            <span className="absolute inset-[3px] rounded-full bg-ink-950" />
+            <span className="relative h-1.5 w-1.5 rounded-full bg-white" />
           </span>
-          <span className="hidden text-lg font-bold tracking-tight sm:block">
-            Vadász&nbsp;<span className="text-gradient">Gyula</span>
-          </span>
+          <span className="display text-lg tracking-tightest">{siteConfig.name}</span>
         </Link>
 
-        {/* Desktop nav */}
-        <ul className="hidden items-center gap-1 md:flex">
-          {navLinks.map((link) => {
-            const active =
-              link.href === '/'
-                ? pathname === '/'
-                : pathname.startsWith(link.href);
-            return (
-              <li key={link.href}>
-                <Link
-                  href={link.href}
-                  className={cn(
-                    'relative rounded-full px-3.5 py-2 text-sm font-medium transition-colors',
-                    active ? 'text-white' : 'text-brand-muted hover:text-white',
-                  )}
-                >
-                  {active && (
-                    <motion.span
-                      layoutId="nav-pill"
-                      className="absolute inset-0 -z-10 rounded-full bg-white/10"
-                      transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                    />
-                  )}
-                  {link.label}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-
-        {/* Actions */}
-        <div className="flex items-center gap-2">
-          <ThemeToggle />
-          <a
-            href={siteConfig.tiktokUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hidden rounded-full bg-brand-pink px-4 py-2 text-sm font-semibold text-white shadow-glow transition hover:brightness-110 sm:inline-block"
-          >
-            TikTok
-          </a>
-          <button
-            onClick={() => setMobileOpen((o) => !o)}
-            aria-label="Menü"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/80 md:hidden"
-          >
-            {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-          </button>
+        <div className="hidden items-center gap-1 sm:flex">
+          {LINKS.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="rounded-full px-4 py-2 text-sm text-white/65 transition hover:bg-white/[0.06] hover:text-white"
+            >
+              {link.label}
+            </Link>
+          ))}
         </div>
-      </nav>
 
-      {/* Mobile menu */}
-      <AnimatePresence>
-        {mobileOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden border-t border-white/10 md:hidden"
+        {taste ? (
+          <div className="flex items-center gap-3">
+            <Link
+              href="/dashboard"
+              className="flex items-center gap-2.5 rounded-full border border-white/10 bg-white/[0.05] py-1 pl-1 pr-3.5 transition hover:bg-white/[0.09]"
+            >
+              <ArtistAvatar name={taste.profile.displayName} image={taste.profile.image} size={28} />
+              <span className="max-w-[9rem] truncate text-sm text-white/80">
+                {taste.profile.displayName}
+              </span>
+            </Link>
+            <form action="/api/auth/logout" method="post">
+              <button
+                type="submit"
+                className="rounded-full px-3 py-2 text-sm text-white/45 transition hover:text-white"
+              >
+                Sign out
+              </button>
+            </form>
+          </div>
+        ) : isSpotifyConfigured() ? (
+          <SpotifyButton size="md" />
+        ) : (
+          // No Spotify credentials on this deployment — offer the demo instead
+          // of a button that can only fail.
+          <a
+            href="/api/auth/demo"
+            className="rounded-full border border-white/15 bg-white/[0.05] px-5 py-2.5 text-sm font-medium text-white/85 transition hover:border-white/30 hover:bg-white/10"
           >
-            <ul className="space-y-1 px-4 py-4">
-              {navLinks.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    onClick={() => setMobileOpen(false)}
-                    className="block rounded-xl px-4 py-3 text-base font-medium text-brand-muted transition hover:bg-white/5 hover:text-white"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
+            Try the demo
+          </a>
         )}
-      </AnimatePresence>
+      </nav>
     </header>
   );
 }

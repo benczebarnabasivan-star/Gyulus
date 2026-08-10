@@ -1,68 +1,69 @@
 import Link from 'next/link';
-import { navLinks, siteConfig } from '@/config/site';
+
+import { siteConfig } from '@/config/site';
 
 export function Footer() {
   const year = new Date().getFullYear();
+
   return (
-    <footer className="border-t border-white/10 bg-brand-dark">
-      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 md:grid-cols-3 lg:px-8">
+    <footer className="relative mt-24 border-t border-white/[0.07] bg-ink-950">
+      <div className="mx-auto grid max-w-7xl gap-10 px-5 py-14 sm:px-8 md:grid-cols-[1.4fr_1fr_1fr]">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-brand-pink to-brand-cyan text-lg font-black text-white">
-              VG
-            </span>
-            <span className="text-lg font-bold">Vadász Gyula</span>
-          </div>
-          <p className="mt-3 max-w-xs text-sm text-brand-muted">
-            {siteConfig.description}
+          <div className="display text-2xl tracking-tightest">{siteConfig.name}</div>
+          <p className="mt-3 max-w-sm text-sm leading-relaxed text-white/50">
+            Connect Spotify, and the festival calendar rearranges itself around what you already
+            listen to — down to the stage and the set time.
           </p>
         </div>
 
         <div>
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-white/70">
-            Oldalak
-          </h3>
-          <ul className="mt-3 space-y-2 text-sm">
-            {navLinks.map((l) => (
-              <li key={l.href}>
-                <Link
-                  href={l.href}
-                  className="text-brand-muted transition hover:text-white"
-                >
-                  {l.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div>
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-white/70">
-            Kövesd
-          </h3>
-          <ul className="mt-3 space-y-2 text-sm">
+          <div className="text-xs uppercase tracking-[0.2em] text-white/35">Explore</div>
+          <ul className="mt-4 space-y-2.5 text-sm text-white/60">
             <li>
-              <a
-                href={siteConfig.tiktokUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-brand-muted transition hover:text-white"
-              >
-                TikTok @{siteConfig.creatorHandle}
-              </a>
+              <Link href="/events" className="transition hover:text-white">
+                All gigs
+              </Link>
+            </li>
+            <li>
+              <Link href="/dashboard" className="transition hover:text-white">
+                Your matches
+              </Link>
             </li>
           </ul>
         </div>
-      </div>
 
-      <div className="border-t border-white/10">
-        <div className="mx-auto max-w-7xl px-4 py-6 text-xs text-brand-muted sm:px-6 lg:px-8">
-          <p>
-            © {year} {siteConfig.name}. Nem hivatalos rajongói oldal — nem áll
-            kapcsolatban a TikTokkal vagy a tartalom-készítővel. Minden videó és
-            védjegy a jogtulajdonosokat illeti.
+        <div>
+          <div className="text-xs uppercase tracking-[0.2em] text-white/35">About the data</div>
+          <p className="mt-4 text-sm leading-relaxed text-white/50">
+            Listening data comes from the Spotify Web API and stays in your session. Festival
+            lineups and set times shown here are{' '}
+            <span className="text-amber/90">sample data</span> for demonstration — not announced
+            schedules.
           </p>
         </div>
+      </div>
+
+      {/* Oversized wordmark, clipped by the footer edge. */}
+      <div aria-hidden className="pointer-events-none select-none overflow-hidden px-5 sm:px-8">
+        <div className="display -mb-4 text-center text-[clamp(3.5rem,17vw,13rem)] uppercase leading-[0.8] tracking-tightest text-white/[0.045] sm:-mb-8">
+          {siteConfig.name}
+        </div>
+      </div>
+
+      <div className="flex flex-col items-center justify-between gap-3 border-t border-white/[0.06] px-5 py-6 text-xs text-white/30 sm:flex-row sm:px-8">
+        <span>
+          Built by{' '}
+          <a
+            href={siteConfig.creator.url}
+            target="_blank"
+            rel="noreferrer noopener"
+            className="text-white/55 transition hover:text-white"
+          >
+            {siteConfig.creator.name}
+          </a>{' '}
+          · {year}
+        </span>
+        <span>Not affiliated with Spotify AB or any festival organiser.</span>
       </div>
     </footer>
   );

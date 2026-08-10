@@ -1,125 +1,151 @@
-# Vadász Gyula — Rajongói Oldal 🤠
+# Resonance
 
-Modern, reszponzív **rajongói weboldal** a magyar TikTokos **Vadász Gyula**
-([@vadasz_gyula](https://www.tiktok.com/@vadasz_gyula)) videóinak. Sötét,
-TikTok-ihlette dizájn, magyar nyelvű felület, PWA-támogatás.
+Connect Spotify, see what you actually listen to, and find the Hungarian festivals and concerts
+your artists are playing.
 
-> **Nem hivatalos rajongói oldal.** Nem áll kapcsolatban a TikTokkal vagy a
-> tartalom-készítővel. Minden videó és védjegy a jogtulajdonosokat illeti.
+- **Your listening** — top artists, top tracks, what's playing right now, recent plays,
+  switchable across the last 4 weeks / 6 months / all time.
+- **Hungarian gigs** — Sziget, STRAND Fesztivál, Budapest Park and PLÁZS Siófok, each bill
+  scored against your real listening history.
+- **Dates you can act on** — which day each of your artists plays, exportable to your calendar.
 
-## 🎬 Hogyan jelenik meg a tartalom (fontos!)
+Built with Next.js 15 (App Router), TypeScript and Tailwind.
 
-A site **kizárólag valódi TikTok tartalmat** mutat, a **TikTok hivatalos
-beágyazásain** keresztül — API-kulcs és scraping nélkül, a platform
-feltételeit tiszteletben tartva:
+---
 
-- **Élő feed** (`/latest`) — a TikTok hivatalos **creator embed** widgetje
-  (`embed.js`) rendereli Vadász Gyula legfrissebb videóit, élőben.
-- **Kiemelt / válogatott klipek** — a [TikTok oEmbed](https://developers.tiktok.com/doc/embed-videos)
-  hivatalos, publikus végpontjáról kapott **valódi** felirat + bélyegkép +
-  lejátszó. A megjelenő videókat a `src/lib/data/realVideos.ts` lista vezérli.
-- **Nincsenek kitalált statisztikák.** Megtekintés/kedvelés számokat és
-  feltöltési dátumokat NEM jelenítünk meg, mert ezek harmadik fél
-  alkotójához az ő engedélye nélkül nem szerezhetők meg — és nem találunk ki
-  ilyet. A számok a TikTokon érhetők el.
-- Az **idézetek** és az **idővonal** egyértelműen jelölt **rajongói**
-  tartalom (illusztratív).
+## Where the event data comes from
 
-### Új videó hozzáadása
-Vedd fel a videó TikTok azonosítóját a `src/lib/data/realVideos.ts` fájlba.
-Csak a hiteles `@vadasz_gyula` fiók videóit add hozzá. A rendszer
-automatikusan ellenőrzi oEmbeddel; a privát/törölt videók kimaradnak.
+**This matters more than any feature in this app, so it is stated first.**
 
-## ✨ Funkciók
+Every listing carries a `SourceRef` — a named origin, a link, the date it was read, and a
+`verified` flag — and the UI renders it on the event card and the event page. You can always
+tell where a line of data came from.
 
-- Animált **hero** szekció és profil
-- **Élő TikTok feed** (hivatalos creator embed)
-- **Válogatott klipek** valódi videókból (hivatalos lejátszó, lite-embed)
-- **Videó részletoldal** valódi felirattal, beágyazott lejátszóval, megosztással
-- **Idézetek** és animált **idővonal** (rajongói tartalom)
-- **Közösség**: szavazások, beküldési űrlap, rajongói fal
-- **Admin** moderációs felület (shared-secret belépés)
-- **SEO**: dinamikus metaadatok, JSON-LD, `sitemap.xml`, `robots.txt`,
-  generált OG/Twitter képek
-- **PWA**: manifest + service worker + offline oldal
-- Sötét/világos téma, mobil-első dizájn, loading skeletonok, hibahatárok
+There are two modes:
 
-## 🧱 Tech stack
+| Mode | When | What you get |
+| --- | --- | --- |
+| **Snapshot** (default) | No `SONGKICK_API_KEY` | A verified static snapshot recorded on 10 Aug 2026 from each event's published source (Time Out Hungary, Sonline, Songkick, HelloBalaton). Real events, real dates. Goes stale over time. |
+| **Live** | `SONGKICK_API_KEY` set | Listings pulled from the Songkick API and matched to your Spotify top artists, alongside the curated Hungarian anchors. |
 
-Next.js 15 (App Router/RSC) · TypeScript (strict) · Tailwind CSS ·
-Framer Motion · next-themes · lucide-react · (opcionális) Prisma + PostgreSQL
-a közösségi/admin funkciókhoz · Docker.
+Two rules the dataset enforces, in `src/lib/events/data/hungary.ts`:
 
-## 📁 Mappaszerkezet (lényeg)
+1. **No artist appears on a bill unless a source listed them.**
+2. **No start time is written unless a running order was actually published.**
 
-```
-src/
-├── app/
-│   ├── page.tsx            # Kezdőlap
-│   ├── latest/             # Élő TikTok feed (creator embed)
-│   ├── funny/              # Válogatott valódi klipek
-│   ├── video/[id]/         # Videó részletoldal (valódi embed)
-│   ├── about/ community/ admin/ offline/
-│   ├── api/
-│   │   ├── submissions/    # Közösségi beküldések (CRUD)
-│   │   └── admin/          # login + cache refresh
-│   ├── sitemap.ts robots.ts manifest.ts opengraph-image.tsx
-│   └── layout.tsx globals.css
-├── components/
-│   ├── video/  TikTokCreatorEmbed · TikTokVideoEmbed · RealVideoCard
-│   ├── home/ quotes/ timeline/ community/ layout/ providers/ ui/
-├── lib/
-│   ├── data/      creator · realVideos · quotes · timeline
-│   ├── services/  videoService · oembed
-│   └── seo.ts utils.ts
-├── config/site.ts
-└── types/index.ts
-```
+Hungarian festivals release full stage-by-stage timetables close to the event, so most acts
+currently have a **date but no time**. The app says so explicitly rather than filling the gap —
+and the calendar export writes those as **all-day entries** instead of inventing an hour.
 
-## 🚀 Helyi futtatás
+### Why Songkick
+
+It is the only provider with real coverage of these venues. Ticketmaster's Discovery API does
+not serve Hungary, and Bandsintown's API rejects requests without an approved partner id.
+Request a key at <https://www.songkick.com/developer>.
+
+## Quick start
 
 ```bash
 npm install
-cp .env.example .env       # nincs szükség TikTok kulcsra
-npm run dev                # http://localhost:3000
+npm run dev
 ```
 
-A site adatbázis és kulcs nélkül is teljesen működik.
+Open <http://127.0.0.1:3000>. Without Spotify credentials the app still runs — click
+**Try the demo** to explore against a built-in sample listener (clearly labelled as such).
 
-| Script              | Leírás                |
-| ------------------- | --------------------- |
-| `npm run dev`       | Fejlesztői szerver    |
-| `npm run build`     | Produkciós build      |
-| `npm run start`     | Produkciós szerver    |
-| `npm run lint`      | ESLint                |
-| `npm run typecheck` | TypeScript ellenőrzés |
+## Connecting a real Spotify account
 
-## 🐳 Docker
+1. Create an app at the [Spotify developer dashboard](https://developer.spotify.com/dashboard).
+2. Add `http://127.0.0.1:3000/api/auth/callback` as a Redirect URI on that app.
+3. Copy the example env file and fill in the client ID:
 
 ```bash
-docker compose up --build   # app + (opcionális) PostgreSQL
+cp .env.example .env.local
 ```
 
-## 🌍 Telepítés (Vercel)
+```dotenv
+SPOTIFY_CLIENT_ID=your_client_id
+SPOTIFY_REDIRECT_URI=http://127.0.0.1:3000/api/auth/callback
+NEXT_PUBLIC_APP_URL=http://127.0.0.1:3000
+```
 
-1. Push a GitHub repóba, importáld a [Vercel](https://vercel.com)-re.
-2. Állítsd be a `NEXT_PUBLIC_SITE_URL`-t a valós domainre.
-3. Deploy — a `next build` automatikusan lefut.
+`SPOTIFY_CLIENT_SECRET` is optional — the app uses Authorization Code with PKCE, which does
+not need one.
 
-## 🔐 Környezeti változók
+> Spotify no longer accepts `localhost` in redirect URIs; use `127.0.0.1` in development.
 
-Lásd `.env.example`:
+### Scopes requested
 
-| Változó                | Leírás                                  |
-| ---------------------- | --------------------------------------- |
-| `NEXT_PUBLIC_SITE_URL` | Publikus URL (SEO, sitemap, OG)         |
-| `TIKTOK_USERNAME`      | `vadasz_gyula`                          |
-| `TIKTOK_CACHE_TTL`     | oEmbed gyorsítótár (mp)                 |
-| `DATABASE_URL`         | (opcionális) PostgreSQL a közösséghez   |
-| `ADMIN_PASSWORD`       | Admin felület jelszava                  |
+`user-read-email`, `user-top-read`, `user-read-currently-playing`, `user-read-recently-played` —
+all read-only. Nothing is written back to your account.
 
-## 📄 Jogi megjegyzés
+### Where tokens live
 
-Közösségi, nem kereskedelmi rajongói projekt. A creator neve, képmása és
-tartalmai a jogtulajdonost illetik. A videók a TikTok hivatalos
-beágyazásain keresztül, az eredeti forrásból jelennek meg.
+Access and refresh tokens are kept in `httpOnly`, `SameSite=Lax` cookies scoped to your own
+session, and are `Secure` in production. There is no database and no server-side user store;
+signing out clears the cookies.
+
+## How the matching works
+
+`src/lib/events/match.ts` scores each event out of 100:
+
+| Component | Weight | What it measures |
+| --- | --- | --- |
+| Artist coverage | 72% | Share of your total listening weight that is on the bill. Each top artist carries an exponentially decaying rank weight, so `#1` counts far more than `#40`. |
+| Genre affinity | 28% | How much of your rank-weighted genre profile the event's tags cover, matched loosely so `belgian techno` still hits `techno`. |
+
+Coverage is a **ratio of what you could possibly match**, not an unbounded sum, so scores stay
+discriminating instead of all pinning near the ceiling.
+
+## Calendar export
+
+`GET /api/events/[slug]/calendar` returns your own acts at an event as an RFC 5545 `.ics` file;
+add `?day=YYYY-MM-DD` to scope it to one day. Requires a session (401 otherwise), and returns
+404 when none of your artists have a *dated* appearance — an act announced without a day cannot
+be put in a calendar.
+
+Entries with a published set time are written as timed events (with after-midnight sets rolling
+`DTEND` onto the next date); entries without one are written as all-day events. Content lines
+are folded at 75 octets over UTF-8 byte boundaries, so names like `Dzsúdló` and
+`Kispál és a Borz` cannot split mid-codepoint.
+
+## Branding
+
+Site name and creator credit live in [`src/config/site.ts`](src/config/site.ts). Change them
+there and the navbar, footer, page metadata and calendar exports all follow.
+
+## Project layout
+
+```
+src/
+  app/
+    page.tsx                  Landing
+    dashboard/                Your listening + ranked gigs
+    events/                   Hungarian calendar
+    events/[slug]/            Bill, day by day, with provenance
+    api/auth/                 login · callback · logout · demo
+    api/events/[slug]/        calendar (.ics)
+  components/
+    event/                    EventCard, SourceNote
+    dashboard/                NowPlaying, TopArtistsRail, UpcomingSets, RangeSwitcher
+    visual/                   Aurora, FestivalArt, ScoreRing, Equalizer, …
+  lib/
+    spotify/                  OAuth (PKCE), API client, session, demo listener
+    events/                   Types, verified data, Songkick provider, matching, ics
+```
+
+## Scripts
+
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Development server |
+| `npm run build` | Production build |
+| `npm run start` | Serve the production build |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | `tsc --noEmit` |
+| `npm run format` | Prettier |
+
+---
+
+Not affiliated with Spotify AB, Songkick, or any festival organiser or venue. Always confirm
+dates on the official site before travelling.

@@ -1,37 +1,17 @@
-// ---------------------------------------------------------------------------
-// Central site configuration: branding, navigation, SEO defaults.
-// ---------------------------------------------------------------------------
-
+/**
+ * Single source of truth for branding. Change the name or the credit here and
+ * it updates the navbar, footer, page metadata and calendar exports at once.
+ */
 export const siteConfig = {
-  name: 'Vadász Gyula Rajongói Oldal',
-  shortName: 'Vadász Gyula',
-  // Marketing tagline (Hungarian).
-  tagline: 'A legviccesebb magyar TikTok pillanatok egy helyen',
+  name: 'Resonance',
+  tagline: 'Your sound. Your summer.',
   description:
-    'Nem hivatalos rajongói weboldal Vadász Gyula magyar TikTokosnak. ' +
-    'Itt találod a legújabb és legviccesebb videóit, virális pillanatait és ' +
-    'emlékezetes idézeteit — folyamatosan frissülve.',
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000',
-  locale: 'hu_HU',
-  creatorHandle: 'vadasz_gyula',
-  tiktokUrl: 'https://www.tiktok.com/@vadasz_gyula',
-  // Primary SEO keywords (see task brief).
-  keywords: [
-    'Vadász Gyula',
-    'Vadász Gyula TikTok',
-    'Vadász Gyula videók',
-    'Vicces magyar TikTok videók',
-    'Magyar TikTok sztárok',
-    'Nagyrábé TikTok',
-    'vadaszgyula',
-  ],
-  ogImage: '/og-image.png',
+    'Connect Spotify to see what you actually listen to, then find the Hungarian festivals and concerts your artists are playing — Sziget, STRAND, Budapest Park and PLÁZS Siófok.',
+  /** Shown as the byline in the footer and in page metadata. */
+  creator: {
+    name: 'Barnabás Bencze',
+    url: 'https://github.com/benczebarnabasivan-star',
+  },
 } as const;
 
-export const navLinks = [
-  { href: '/', label: 'Kezdőlap' },
-  { href: '/latest', label: 'Élő feed' },
-  { href: '/funny', label: 'Válogatott klipek' },
-  { href: '/community', label: 'Közösség' },
-  { href: '/about', label: 'Rólunk' },
-] as const;
+export type SiteConfig = typeof siteConfig;

@@ -1,25 +1,21 @@
 {
-  "name": "vadasz-gyula-fan-site",
+  "name": "resonance",
   "version": "1.0.0",
   "private": true,
-  "description": "Rajongói weboldal a magyar TikTokos Vadász Gyula legviccesebb videóinak.",
+  "description": "Connect Spotify, see what you actually listen to, and find the festivals your artists are playing — with set times.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev",
     "format": "prettier --write ."
   },
   "dependencies": {
-    "@prisma/client": "^6.2.1",
     "clsx": "^2.1.1",
     "framer-motion": "^11.15.0",
     "lucide-react": "^0.469.0",
     "next": "^15.5.19",
-    "next-themes": "^0.4.4",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "tailwind-merge": "^2.6.0"
@@ -33,9 +29,7 @@
     "eslint-config-next": "^15.5.19",
     "postcss": "^8.4.49",
     "prettier": "^3.4.2",
-    "prisma": "^6.2.1",
     "tailwindcss": "^3.4.17",
-    "tsx": "^4.19.2",
     "typescript": "^5.7.2"
   },
   "engines": {
