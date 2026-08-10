@@ -10,9 +10,11 @@ import { FestivalCard } from '@/components/festival/FestivalCard';
 import { Badge } from '@/components/ui/Badge';
 import { Aurora } from '@/components/visual/Aurora';
 import { Reveal } from '@/components/visual/Reveal';
+import { RangeSwitcher } from '@/components/dashboard/RangeSwitcher';
 import { getFestivals } from '@/lib/festivals';
 import { rankFestivals, upcomingSetsFor } from '@/lib/festivals/match';
 import { getTasteProfile } from '@/lib/spotify/session';
+import { TIME_RANGE_LABELS, type TimeRange } from '@/lib/spotify/types';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,8 +23,19 @@ export const metadata: Metadata = {
   description: 'Festivals ranked against your Spotify listening, with set times for your artists.',
 };
 
-export default async function DashboardPage() {
-  const taste = await getTasteProfile();
+const RANGES: TimeRange[] = ['short_term', 'medium_term', 'long_term'];
+
+function parseRange(value: string | undefined): TimeRange {
+  return RANGES.includes(value as TimeRange) ? (value as TimeRange) : 'medium_term';
+}
+
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ range?: string }>;
+}) {
+  const range = parseRange((await searchParams).range);
+  const taste = await getTasteProfile(range);
   if (!taste) redirect('/');
 
   const matches = rankFestivals(getFestivals(), taste);
@@ -99,13 +112,11 @@ export default async function DashboardPage() {
         {/* ── Top artists ────────────────────────────────────── */}
         <section className="mt-16">
           <Reveal>
-            <div className="flex items-end justify-between gap-4">
+            <div className="flex flex-wrap items-end justify-between gap-4">
               <h2 className="display text-2xl uppercase tracking-tight sm:text-3xl">
                 Your top artists
               </h2>
-              <span className="text-xs uppercase tracking-[0.18em] text-white/35">
-                Last 6 months
-              </span>
+              <RangeSwitcher active={range} />
             </div>
           </Reveal>
           <Reveal delay={0.06}>
@@ -173,7 +184,9 @@ export default async function DashboardPage() {
               <h2 className="display text-2xl uppercase tracking-tight sm:text-3xl">
                 On repeat
               </h2>
-              <p className="mt-2 text-sm text-white/50">Your most played tracks right now.</p>
+              <p className="mt-2 text-sm text-white/50">
+                Your most played tracks · {TIME_RANGE_LABELS[range].toLowerCase()}.
+              </p>
             </Reveal>
             <Reveal delay={0.06}>
               <ol className="mt-7 space-y-1">

@@ -1,7 +1,14 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { AlertTriangle, CalendarDays, ExternalLink, MapPin, Ticket } from 'lucide-react';
+import {
+  AlertTriangle,
+  CalendarDays,
+  CalendarPlus,
+  ExternalLink,
+  MapPin,
+  Ticket,
+} from 'lucide-react';
 
 import { LineupPoster } from '@/components/festival/LineupPoster';
 import { Timetable } from '@/components/festival/Timetable';
@@ -269,8 +276,26 @@ export default async function FestivalPage({ params, searchParams }: PageProps) 
           {mySetsToday.length > 0 && (
             <Reveal delay={0.05}>
               <div className="mt-8 rounded-3xl border border-spot/25 bg-spot/[0.06] p-5 sm:p-6">
-                <div className="text-xs uppercase tracking-[0.2em] text-spot/80">
-                  Your running order
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="text-xs uppercase tracking-[0.2em] text-spot/80">
+                    Your running order
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <a
+                      href={`/api/festivals/${festival.slug}/calendar?day=${activeDay.date}`}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-spot/35 bg-spot/10 px-3.5 py-1.5 text-xs font-medium text-spot transition hover:bg-spot/20"
+                    >
+                      <CalendarPlus className="h-3.5 w-3.5" aria-hidden />
+                      Add this day
+                    </a>
+                    <a
+                      href={`/api/festivals/${festival.slug}/calendar`}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-white/15 px-3.5 py-1.5 text-xs font-medium text-white/70 transition hover:border-white/30 hover:text-white"
+                    >
+                      <CalendarPlus className="h-3.5 w-3.5" aria-hidden />
+                      All {match?.artists.length ?? 0} artists
+                    </a>
+                  </div>
                 </div>
                 <ol className="mt-4 divide-y divide-spot/15">
                   {mySetsToday.map(({ artist, set }) => (

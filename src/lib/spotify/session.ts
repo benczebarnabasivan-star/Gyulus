@@ -20,7 +20,7 @@ import type { TasteProfile, TimeRange } from './types';
  */
 export const getTasteProfile = cache(
   async (range: TimeRange = 'medium_term'): Promise<TasteProfile | null> => {
-    if (await isDemoSession()) return demoTasteProfile();
+    if (await isDemoSession()) return demoTasteProfile(range);
 
     const token = await getAccessToken();
     if (!token) return null;

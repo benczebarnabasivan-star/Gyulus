@@ -1,4 +1,4 @@
-import type { RecentPlay, SpotifyArtist, SpotifyTrack, TasteProfile } from './types';
+import type { RecentPlay, SpotifyArtist, SpotifyTrack, TasteProfile, TimeRange } from './types';
 
 /**
  * A built-in sample listener so the whole product is explorable without
@@ -98,7 +98,25 @@ function demoRecent(): RecentPlay[] {
   }));
 }
 
-export function demoTasteProfile(): TasteProfile {
+/**
+ * Deterministic reordering per time range, so the dashboard's range switcher
+ * visibly changes the sample listener's taste the way a real account would.
+ * Recent listening skews electronic; the all-time list pulls the band and
+ * hip-hop entries back up.
+ */
+function reorderFor<T>(items: T[], range: TimeRange): T[] {
+  if (range === 'medium_term') return items;
+
+  const rotation = range === 'short_term' ? 5 : 11;
+  const rotated = [...items.slice(rotation), ...items.slice(0, rotation)];
+  // All-time keeps a longer tail; the 4-week window is necessarily narrower.
+  return range === 'short_term' ? rotated.slice(0, Math.ceil(items.length * 0.7)) : rotated;
+}
+
+export function demoTasteProfile(range: TimeRange = 'medium_term'): TasteProfile {
+  const topArtists = reorderFor(demoArtists, range);
+  const topTracks = reorderFor(demoTracks, range);
+
   return {
     profile: {
       id: 'demo-listener',
@@ -107,8 +125,8 @@ export function demoTasteProfile(): TasteProfile {
       country: 'HU',
       product: 'demo',
     },
-    topArtists: demoArtists,
-    topTracks: demoTracks,
+    topArtists,
+    topTracks,
     nowPlaying: {
       isPlaying: true,
       progressMs: 74_000,

@@ -2,6 +2,7 @@ import Link from 'next/link';
 
 import { ArtistAvatar } from '@/components/visual/ArtistAvatar';
 import { SpotifyButton } from '@/components/ui/SpotifyButton';
+import { siteConfig } from '@/config/site';
 import { isSpotifyConfigured } from '@/lib/spotify/auth';
 import { getTasteProfile } from '@/lib/spotify/session';
 
@@ -22,7 +23,7 @@ export async function Navbar() {
             <span className="absolute inset-[3px] rounded-full bg-ink-950" />
             <span className="relative h-1.5 w-1.5 rounded-full bg-white" />
           </span>
-          <span className="display text-lg tracking-tightest">Resonance</span>
+          <span className="display text-lg tracking-tightest">{siteConfig.name}</span>
         </Link>
 
         <div className="hidden items-center gap-1 sm:flex">

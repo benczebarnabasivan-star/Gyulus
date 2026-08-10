@@ -3,12 +3,19 @@
 Connect Spotify, see what you actually listen to, and find the festivals your artists are
 playing — down to the day, the stage and the set time.
 
-- **Your listening** — top artists, top tracks, what's playing right now, recent plays.
-- **Ranked festivals** — every lineup scored against your real listening history.
-- **Set times** — a clashfinder-style timetable with your artists lit up, and a warning when
-  two of them are on at once.
+- **Your listening** — top artists, top tracks, what's playing right now, recent plays,
+  switchable across the last 4 weeks / 6 months / all time.
+- **Ranked festivals** — every lineup scored against your real listening history, filterable
+  by genre, country and month, and searchable by festival, city or artist.
+- **Set times** — a clashfinder-style timetable with your artists lit up, a warning when two
+  of them are on at once, and a one-click export of your running order to your calendar.
 
 Built with Next.js 15 (App Router), TypeScript and Tailwind.
+
+## Branding
+
+Site name and the creator credit live in one place — [`src/config/site.ts`](src/config/site.ts).
+Change them there and the navbar, footer, page metadata and calendar exports all follow.
 
 ---
 
@@ -67,9 +74,23 @@ Coverage is expressed as a **ratio of what you could possibly match**, not as an
 sum — so a lineup carrying your top 3 scores well below one carrying your top 20, instead of
 both pinning at the ceiling.
 
-Overlaps are detected pairwise per day. Times before 06:00 are treated as belonging to the
+Overlaps are detected pairwise per day, and each set records *which* of your artists it runs
+into, so a clash warning names the conflict. Times before 06:00 are treated as belonging to the
 previous night, so a 23:30–01:00 set is one continuous block rather than one that wraps around
-to the start of the day.
+to the start of the day — the calendar export applies the same rule, rolling `DTEND` onto the
+next date.
+
+## Calendar export
+
+`GET /api/festivals/[slug]/calendar` returns your own running order for a festival as an
+RFC 5545 `.ics` file; add `?day=YYYY-MM-DD` for a single day. Set times are written as floating
+local values (no timezone), so they read as the festival's wall-clock time in any calendar app —
+which is what a printed running order means. Requires a session; returns 401 otherwise.
+
+## URLs are the state
+
+The range switcher, every filter chip and the search box are plain links and a GET form, so each
+combination is a real URL — shareable, back-button friendly, and working with JavaScript off.
 
 ## Project layout
 

@@ -2,21 +2,24 @@ import type { Metadata, Viewport } from 'next';
 
 import { Footer } from '@/components/layout/Footer';
 import { Navbar } from '@/components/layout/Navbar';
+import { siteConfig } from '@/config/site';
 
 import './globals.css';
 
 export const metadata: Metadata = {
   title: {
-    default: 'Resonance — your Spotify, your festival summer',
-    template: '%s · Resonance',
+    default: `${siteConfig.name} — ${siteConfig.tagline}`,
+    template: `%s · ${siteConfig.name}`,
   },
-  description:
-    'Connect Spotify to see what you actually listen to, then find the festivals your artists are playing — with the day, the stage and the set time.',
-  applicationName: 'Resonance',
+  description: siteConfig.description,
+  applicationName: siteConfig.name,
+  authors: [{ name: siteConfig.creator.name, url: siteConfig.creator.url }],
+  creator: siteConfig.creator.name,
   openGraph: {
-    title: 'Resonance — your Spotify, your festival summer',
+    title: `${siteConfig.name} — ${siteConfig.tagline}`,
     description:
       'Festival recommendations built from your real listening history, down to individual set times.',
+    siteName: siteConfig.name,
     type: 'website',
   },
   robots: { index: true, follow: true },
