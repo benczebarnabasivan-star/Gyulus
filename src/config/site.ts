@@ -6,7 +6,7 @@ export const siteConfig = {
   name: 'Resonance',
   tagline: 'Your sound. Your summer.',
   description:
-    'Connect Spotify to see what you actually listen to, then find the festivals your artists are playing — with the day, the stage and the set time.',
+    'Connect Spotify to see what you actually listen to, then find the Hungarian festivals and concerts your artists are playing — Sziget, STRAND, Budapest Park and PLÁZS Siófok.',
   /** Shown as the byline in the footer and in page metadata. */
   creator: {
     name: 'Barnabás Bencze',

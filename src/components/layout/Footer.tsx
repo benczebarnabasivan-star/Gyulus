@@ -20,8 +20,8 @@ export function Footer() {
           <div className="text-xs uppercase tracking-[0.2em] text-white/35">Explore</div>
           <ul className="mt-4 space-y-2.5 text-sm text-white/60">
             <li>
-              <Link href="/festivals" className="transition hover:text-white">
-                All festivals
+              <Link href="/events" className="transition hover:text-white">
+                All gigs
               </Link>
             </li>
             <li>

@@ -1,18 +1,18 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { FlaskConical, TrendingUp } from 'lucide-react';
+import { Database, FlaskConical, Radio, TrendingUp } from 'lucide-react';
 
 import { NowPlayingPanel } from '@/components/dashboard/NowPlaying';
+import { RangeSwitcher } from '@/components/dashboard/RangeSwitcher';
 import { TopArtistsRail } from '@/components/dashboard/TopArtistsRail';
 import { UpcomingSets } from '@/components/dashboard/UpcomingSets';
-import { FestivalCard } from '@/components/festival/FestivalCard';
+import { EventCard } from '@/components/event/EventCard';
 import { Badge } from '@/components/ui/Badge';
 import { Aurora } from '@/components/visual/Aurora';
 import { Reveal } from '@/components/visual/Reveal';
-import { RangeSwitcher } from '@/components/dashboard/RangeSwitcher';
-import { getFestivals } from '@/lib/festivals';
-import { rankFestivals, upcomingSetsFor } from '@/lib/festivals/match';
+import { getEventFeed } from '@/lib/events';
+import { rankEvents, upcomingAppearances } from '@/lib/events/match';
 import { getTasteProfile } from '@/lib/spotify/session';
 import { TIME_RANGE_LABELS, type TimeRange } from '@/lib/spotify/types';
 
@@ -20,7 +20,7 @@ export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'For you',
-  description: 'Festivals ranked against your Spotify listening, with set times for your artists.',
+  description: 'Hungarian gigs ranked against your Spotify listening.',
 };
 
 const RANGES: TimeRange[] = ['short_term', 'medium_term', 'long_term'];
@@ -38,20 +38,13 @@ export default async function DashboardPage({
   const taste = await getTasteProfile(range);
   if (!taste) redirect('/');
 
-  const matches = rankFestivals(getFestivals(), taste);
-  const withMatches = matches.filter((m) => m.artists.length > 0);
+  const feed = await getEventFeed(taste.topArtists.map((a) => a.name));
+  const matches = rankEvents(feed.events, taste);
+  const withMatches = matches.filter((m) => m.acts.length > 0);
   const [top, ...rest] = matches;
-  const upcoming = upcomingSetsFor(withMatches, 10);
+  const upcoming = upcomingAppearances(withMatches, 10);
 
-  // Artists that appear on at least one lineup, for the "Live" pip on the rail.
-  const playingSoon = new Set(
-    withMatches.flatMap((m) => m.artists.map((a) => a.artist.id)),
-  );
-
-  const totalSets = withMatches.reduce(
-    (sum, m) => sum + m.artists.reduce((n, a) => n + a.sets.length, 0),
-    0,
-  );
+  const playingSoon = new Set(withMatches.flatMap((m) => m.acts.map((a) => a.artist.id)));
   const genres = [...new Set(taste.topArtists.flatMap((a) => a.genres))].slice(0, 8);
 
   return (
@@ -63,7 +56,6 @@ export default async function DashboardPage({
       />
 
       <div className="mx-auto max-w-7xl px-5 py-14 sm:px-8">
-        {/* ── Header ─────────────────────────────────────────── */}
         <Reveal>
           <div className="flex flex-wrap items-start justify-between gap-6">
             <div>
@@ -79,16 +71,15 @@ export default async function DashboardPage({
                 <span className="text-gradient-hot">{taste.profile.displayName}</span>
               </h1>
               <p className="mt-5 max-w-lg text-white/60">
-                {withMatches.length > 0 ? (
+                {playingSoon.size > 0 ? (
                   <>
                     <span className="font-semibold text-white">{playingSoon.size}</span> of your top
-                    artists are playing{' '}
-                    <span className="font-semibold text-white">{totalSets}</span> sets across{' '}
+                    artists {playingSoon.size === 1 ? 'is' : 'are'} on{' '}
                     <span className="font-semibold text-white">{withMatches.length}</span>{' '}
-                    festivals.
+                    Hungarian {withMatches.length === 1 ? 'bill' : 'bills'} this season.
                   </>
                 ) : (
-                  'None of your top artists are on these lineups — but the genre match still points somewhere.'
+                  'None of your top artists are on these Hungarian bills right now — the genre match still points somewhere.'
                 )}
               </p>
             </div>
@@ -99,15 +90,33 @@ export default async function DashboardPage({
           </div>
         </Reveal>
 
-        {taste.isDemo && (
-          <Reveal delay={0.05}>
-            <div className="mt-8 rounded-2xl border border-amber/25 bg-amber/[0.07] px-5 py-4 text-sm text-amber/90">
-              You are exploring with a built-in sample listening history, and the lineups below are
-              sample data too. Connect a real Spotify account to rank these against your own top
-              artists.
+        {/* Where the listings came from, and whether the listener is real. */}
+        <Reveal delay={0.05}>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <div
+              className={
+                'flex flex-1 items-start gap-2.5 rounded-2xl border px-4 py-3 text-sm leading-relaxed ' +
+                (feed.mode === 'live'
+                  ? 'border-spot/25 bg-spot/[0.07] text-spot/90'
+                  : 'border-white/10 bg-white/[0.03] text-white/55')
+              }
+            >
+              {feed.mode === 'live' ? (
+                <Radio className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+              ) : (
+                <Database className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+              )}
+              <p>{feed.note}</p>
             </div>
-          </Reveal>
-        )}
+
+            {taste.isDemo && (
+              <div className="flex-1 rounded-2xl border border-amber/25 bg-amber/[0.07] px-4 py-3 text-sm leading-relaxed text-amber/90">
+                Your listening here is a built-in sample, not a real account. Connect Spotify to
+                rank these gigs against what you actually play.
+              </div>
+            )}
+          </div>
+        </Reveal>
 
         {/* ── Top artists ────────────────────────────────────── */}
         <section className="mt-16">
@@ -155,35 +164,33 @@ export default async function DashboardPage({
             </Reveal>
             <Reveal delay={0.07}>
               <div className="mt-7">
-                <FestivalCard festival={top.festival} match={top} featured />
+                <EventCard event={top.event} match={top} featured />
               </div>
             </Reveal>
           </section>
         )}
 
-        {/* ── Set times ──────────────────────────────────────── */}
+        {/* ── Dated appearances ──────────────────────────────── */}
         <section className="mt-20 grid gap-10 lg:grid-cols-[1.25fr_1fr]">
           <div>
             <Reveal>
               <h2 className="display text-2xl uppercase tracking-tight sm:text-3xl">
-                When your artists are on
+                When your artists play
               </h2>
               <p className="mt-2 text-sm text-white/50">
-                Every set by one of your top artists, in chronological order.
+                Every dated appearance by one of your top artists, in order.
               </p>
             </Reveal>
             <Reveal delay={0.06}>
               <div className="mt-7">
-                <UpcomingSets sets={upcoming} />
+                <UpcomingSets appearances={upcoming} />
               </div>
             </Reveal>
           </div>
 
           <div>
             <Reveal>
-              <h2 className="display text-2xl uppercase tracking-tight sm:text-3xl">
-                On repeat
-              </h2>
+              <h2 className="display text-2xl uppercase tracking-tight sm:text-3xl">On repeat</h2>
               <p className="mt-2 text-sm text-white/50">
                 Your most played tracks · {TIME_RANGE_LABELS[range].toLowerCase()}.
               </p>
@@ -223,18 +230,15 @@ export default async function DashboardPage({
                 <h2 className="display text-2xl uppercase tracking-tight sm:text-3xl">
                   Ranked for you
                 </h2>
-                <Link
-                  href="/festivals"
-                  className="text-sm text-white/50 transition hover:text-white"
-                >
+                <Link href="/events" className="text-sm text-white/50 transition hover:text-white">
                   Browse all →
                 </Link>
               </div>
             </Reveal>
             <div className="mt-7 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
               {rest.map((match, i) => (
-                <Reveal key={match.festival.slug} delay={Math.min(i, 5) * 0.05}>
-                  <FestivalCard festival={match.festival} match={match} className="h-full" />
+                <Reveal key={match.event.slug} delay={Math.min(i, 5) * 0.05}>
+                  <EventCard event={match.event} match={match} className="h-full" />
                 </Reveal>
               ))}
             </div>

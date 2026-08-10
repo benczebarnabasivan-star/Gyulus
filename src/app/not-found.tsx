@@ -12,10 +12,10 @@ export default function NotFound() {
         </div>
         <p className="mt-4 text-lg text-white/60">That stage is not on the map.</p>
         <Link
-          href="/festivals"
+          href="/events"
           className="mt-8 inline-flex rounded-full bg-spot px-7 py-3.5 font-semibold text-black transition hover:brightness-110"
         >
-          Browse festivals
+          Browse gigs
         </Link>
       </div>
     </div>

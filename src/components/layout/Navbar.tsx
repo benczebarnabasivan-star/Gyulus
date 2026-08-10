@@ -7,7 +7,7 @@ import { isSpotifyConfigured } from '@/lib/spotify/auth';
 import { getTasteProfile } from '@/lib/spotify/session';
 
 const LINKS = [
-  { href: '/festivals', label: 'Festivals' },
+  { href: '/events', label: 'Gigs' },
   { href: '/dashboard', label: 'For you' },
 ];
 

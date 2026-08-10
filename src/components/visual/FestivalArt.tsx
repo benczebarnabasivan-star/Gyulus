@@ -1,8 +1,13 @@
 import { cn, hashUnit } from '@/lib/utils';
-import type { Festival } from '@/lib/festivals/types';
+
+type ArtSubject = {
+  slug: string;
+  name: string;
+  palette: [string, string, string];
+};
 
 type Props = {
-  festival: Pick<Festival, 'slug' | 'palette' | 'name'>;
+  festival: ArtSubject;
   className?: string;
   /** Adds concentric arcs and a grid; used on larger surfaces. */
   detailed?: boolean;
