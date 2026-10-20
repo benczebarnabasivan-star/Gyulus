@@ -1,25 +1,30 @@
 # APRÓBETŰ – video intro
 
 A 7.5-second vertical (9:16, 1080 × 1920, 60 fps) intro for APRÓBETŰ, for TikTok, Instagram Reels and YouTube Shorts.
-It is rendered from code, so it is frame-exact and repeatable, and the logo is a swappable input file.
+It is rendered from code, so it is frame-exact and repeatable, and the logo is an input file.
 
 **Output:** `output/aprobetu-intro-1080x1920.mp4` (H.264 High, BT.709, AAC 48 kHz stereo, about -15 LUFS)
-plus a `_final-frame.png` of the end card. The renders in `output/` right now use a **placeholder wordmark**
-(`_PLACEHOLDER-LOGO` in the file name), because the brand logo is not in the repository yet.
+plus `output/aprobetu-intro-1080x1920_final-frame.png`, a still of the end card.
 
-## Adding the real logo
+## Logo
 
-1. Save the original logo as **`assets/logo.svg`** (best) or **`assets/logo.png`** (transparent background, at least 1400 px wide).
-   Use the version made for dark backgrounds.
-2. Run `./render.sh`. The output name drops the `_PLACEHOLDER-LOGO` suffix.
+- `assets/logo-original.png`: the logo exactly as supplied (1254 × 1254, on its own square navy background).
+- `assets/logo.png`: the round badge cut out of that square by `tools/cutout_logo.py`.
+  Only pixels outside the gold ring become transparent. The ring is traced angle by angle, because it is not perfectly round.
+  Everything inside it is copied pixel for pixel.
 
-How the logo is treated:
-- It is drawn as an untouched image. It is never redrawn, recoloured, stretched or re-typeset.
-- Transparent margins are trimmed so it centres correctly. It is scaled uniformly to fit 700 × 500 px, inside the safe area.
-- During the reveal it only fades, scales and sharpens, and gets one light glint.
+How the logo is treated in the animation:
+- It is drawn as an untouched image. It is never redrawn, recoloured, stretched or re-typeset,
+  and the tagline and category labels stay because they are part of the logo.
+- It is scaled uniformly to 840 px wide (78 % of the frame width), centred, inside the safe area.
+- During the reveal it only fades, scales and sharpens.
   From 6.2 s it sits at 1:1 on whole pixels, with nothing drawn over it.
-- The ring of 12 stars sizes itself to clear the logo's bounding box.
-- The renderer warns if a PNG is too small (it would be upscaled) or the logo is mostly dark (it would vanish on navy).
+- Glow and glint only ever brighten its type and gold, never its navy disc.
+
+To use a different logo, save it as `assets/logo.svg` or `assets/logo.png` (transparent background) and run `./render.sh`.
+For a logo on a square background, run `python3 tools/cutout_logo.py new.png assets/logo.png` first.
+A round badge is detected automatically (iris reveal, stars land on its ring). Wide wordmarks get a horizontal wipe and a ring of stars around them.
+Without any logo file, the renderer falls back to a placeholder wordmark and names the output `_PLACEHOLDER-LOGO`.
 
 ## Sequence
 
@@ -27,11 +32,11 @@ How the logo is treated:
 |---|---|---|
 | 0.0–2.2 s | Dark navy. A dot-matrix map of Europe is revealed from Budapest. A gold link runs to Brussels, then glowing links spread to every EU capital, with gold data particles flowing along them. | Low pad, digital pings, data ticks, soft pulse |
 | 2.2–4.4 s | News-style hairlines sweep in. Corner brackets, HUD rings and small geometric shapes move across. Line art of the European Parliament hemicycle and a classical portico appears. The map dims behind them. | Whoosh, pulse continues |
-| 4.4–5.3 s | The camera dives into the map. Particles, rings and lines converge on the centre, and the 12 EU stars fly in. | Riser, quicker pulses, a short silence |
-| 5.3 s | Impact: light bloom, a horizontal light streak and a shockwave. The logo opens from the centre line, from blurred to sharp. | Cinematic hit, resolving chord, shimmer |
-| 6.4–7.5 s | A static end card: the logo, the star ring, soft gold specks and the backlight. Every frame is identical, so it cuts cleanly into the video. | Tail fades to silence |
+| 4.4–5.3 s | The camera dives into the map. Particles, rings and lines converge on the centre, and 12 gold stars fly in onto the badge's ring. | Riser, quicker pulses, a short silence |
+| 5.3 s | Impact: light bloom, a horizontal light streak and a shockwave. The badge opens from the centre in an iris, from blurred to sharp, and the stars dissolve into its gold ring. | Cinematic hit, resolving chord, shimmer |
+| 6.4–7.5 s | A static end card: the badge, a soft backlight and a few gold specks. Every frame is identical, so it cuts cleanly into the video. | Tail fades to silence |
 
-There are no subtitles, slogans, watermarks or other text. Only the logo carries type.
+There are no subtitles, slogans or watermarks beyond what is inside the logo itself.
 
 ## Rendering
 
@@ -52,4 +57,5 @@ Opening `intro/scene.html` in a browser plays a live, looping preview.
 - `intro/render.js`: drives headless Chromium frame by frame and pipes the frames to ffmpeg.
 - `intro/audio.py`: synthesises the sound design from scratch with numpy/scipy. It has no samples and no music, so there is nothing to license.
 - `intro/europe-data.js`: map dots, capitals and graticule, generated by `tools/build_map.py` from Natural Earth 1:50m (public domain).
-- `assets/logo-placeholder.png`: the stand-in wordmark (Inter, SIL OFL), made by `tools/make_placeholder_logo.js`.
+- `tools/cutout_logo.py`: cuts a round badge out of its square background.
+- `assets/logo-placeholder.png`: the fallback wordmark (Inter, SIL OFL), made by `tools/make_placeholder_logo.js`.

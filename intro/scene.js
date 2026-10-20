@@ -668,7 +668,10 @@
   function drawStars(t) {
     if (t < 4.72 || !logo) return;
     const R = logo.ringR;
-    const settle = 0.22 * (1 - ease.outCubic(prog(t, T.impact, T.freeze)));
+    // On a round badge the stars land on its ring and dissolve into it; otherwise they stay as a ring.
+    const settle = logo.round ? 0 : 0.22 * (1 - ease.outCubic(prog(t, T.impact, T.freeze)));
+    const dissolve = logo.round ? 1 - smooth(T.impact + 0.05, T.impact + 0.42, t) : 1;
+    if (dissolve <= 0) return;
     const bump = Math.sin(Math.PI * prog(t, T.impact + 0.04, T.impact + 0.4)) * 0.035;
     for (let i = 0; i < 12; i++) {
       const base = -Math.PI / 2 + (i * Math.PI) / 6;
@@ -676,8 +679,8 @@
       const e = ease.inOutCubic(prog(t, t0, T.impact));
       const ang = base + settle - 1.3 * (1 - e);
       const rad = lerp(1500, R, e) * (1 + bump);
-      const size = logo.starR * (1 + 1.2 * (1 - e));
-      const alpha = 0.95 * smooth(t0, t0 + 0.2, t);
+      const size = logo.starR * (1 + 1.2 * (1 - e)) * (0.6 + 0.4 * dissolve);
+      const alpha = 0.95 * smooth(t0, t0 + 0.2, t) * dissolve;
       const x = CX + Math.cos(ang) * rad, y = CY + Math.sin(ang) * rad;
       if (e < 1) {
         // motion trail
@@ -730,6 +733,28 @@
     if (x1 < 0) return null;
     return { x: x0, y: y0, w: x1 - x0 + 1, h: y1 - y0 + 1, lum: n ? lum / n : 1 };
   }
+  // A square-ish logo whose corners are transparent is treated as a round badge.
+  function cornersClear(c, bb) {
+    if (bb.w / bb.h > 1.15 || bb.h / bb.w > 1.15) return false;
+    const d = c.getContext('2d').getImageData(bb.x, bb.y, bb.w, bb.h).data;
+    const ix = Math.round(bb.w * 0.06), iy = Math.round(bb.h * 0.06);
+    return [[ix, iy], [bb.w - 1 - ix, iy], [ix, bb.h - 1 - iy], [bb.w - 1 - ix, bb.h - 1 - iy]]
+      .every(([x, y]) => d[(y * bb.w + x) * 4 + 3] < 10);
+  }
+  // Only the bright parts of the logo (type, gold, white), used for its glow and glint; never drawn on their own.
+  function highlights(src) {
+    const c = makeCanvas(src.width, src.height), g = c.getContext('2d');
+    g.drawImage(src, 0, 0);
+    try {
+      const img = g.getImageData(0, 0, c.width, c.height), d = img.data;
+      for (let i = 0; i < d.length; i += 4) {
+        const l = (0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2]) / 255;
+        d[i + 3] *= clamp((l - 0.4) / 0.3);
+      }
+      g.putImageData(img, 0, 0);
+    } catch (e) { /* tainted canvas in file:// preview: glow the whole logo */ }
+    return c;
+  }
   function resample(src, bb, w, h) {
     let cur = makeCanvas(bb.w, bb.h);
     cur.getContext('2d').drawImage(src, bb.x, bb.y, bb.w, bb.h, 0, 0, bb.w, bb.h);
@@ -762,29 +787,37 @@
     img.src = opts.src;
     await img.decode();
     const isSvg = /^data:image\/svg|\.svg(\?|$)/i.test(opts.src);
-    const maxW = opts.maxW || 700, maxH = opts.maxH || 500;
     const nw = img.naturalWidth || 1200, nh = img.naturalHeight || 400;
-    const k = isSvg ? Math.max(1, 2 * Math.min(maxW / nw, maxH / nh)) : 1;
+    const k = isSvg ? Math.max(1, 2 * Math.min(840 / nw, 840 / nh)) : 1;
     const raw = makeCanvas(Math.round(nw * k), Math.round(nh * k));
     raw.getContext('2d').drawImage(img, 0, 0, raw.width, raw.height);
     let bb = { x: 0, y: 0, w: raw.width, h: raw.height, lum: 1 };
-    try { bb = alphaBounds(raw) || bb; } catch (e) { /* tainted canvas in file:// preview: skip trimming */ }
+    let round = false;
+    try {
+      bb = alphaBounds(raw) || bb;
+      round = cornersClear(raw, bb);
+    } catch (e) { /* tainted canvas in file:// preview: skip trimming */ }
+    // Wide wordmarks fit 700 x 500; square and round badges get 840 x 840 so their small type stays legible.
+    const square = bb.w / bb.h < 1.4 && bb.h / bb.w < 1.4;
+    const maxW = opts.maxW || (square ? 840 : 700), maxH = opts.maxH || (square ? 840 : 500);
     const s = Math.min(maxW / bb.w, maxH / bb.h);
     const w = Math.round(bb.w * s), h = Math.round(bb.h * s);
     const out = resample(raw, bb, w, h);
     const pad = 90;
+    const hi = highlights(out);
     const glow = makeCanvas(w + pad * 2, h + pad * 2), gg = glow.getContext('2d');
     gg.filter = 'blur(22px)';
-    gg.drawImage(out, pad, pad);
-    const starR = 14;
+    gg.drawImage(hi, pad, pad);
+    const starR = round ? 16 : 14;
     logo = {
-      canvas: out, glow, pad, w, h, starR,
+      canvas: out, hi, glow, pad, w, h, starR, round,
       x: Math.round(CX - w / 2), y: Math.round(CY - h / 2),
-      ringR: ringRadius(w, h, starR),
+      // A round badge: the stars land on its own ring. Otherwise they circle the logo.
+      ringR: round ? Math.max(w, h) / 2 - 7 : ringRadius(w, h, starR),
     };
     fx = makeCanvas(w + pad * 2, h + pad * 2);
     buildFinalDust();
-    return { width: w, height: h, sourceWidth: bb.w, sourceHeight: bb.h, upscale: s, luminance: bb.lum, ringRadius: logo.ringR, isSvg };
+    return { width: w, height: h, sourceWidth: bb.w, sourceHeight: bb.h, upscale: s, luminance: bb.lum, ringRadius: logo.ringR, isSvg, round };
   }
 
   function drawLogoBacklight(t) {
@@ -813,7 +846,7 @@
     const pulse = Math.exp(-k * 3.2) * (1 - smooth(0.6, 0.9, k));
     if (pulse > 0.003) {
       ctx.globalCompositeOperation = 'lighter';
-      ctx.globalAlpha = 0.85 * pulse;
+      ctx.globalAlpha = (logo.round ? 0.45 : 0.85) * pulse;
       const gw = logo.glow.width * scale, gh = logo.glow.height * scale;
       ctx.drawImage(logo.glow, CX - gw / 2, CY - gh / 2, gw, gh);
       ctx.globalAlpha = 1;
@@ -829,7 +862,17 @@
       if (blur > 0.05) g.filter = `blur(${blur.toFixed(2)}px)`;
       g.drawImage(logo.canvas, pad, pad);
       g.filter = 'none';
-      if (wipe < 1) {
+      if (wipe < 1 && logo.round) {
+        // Iris opening from the centre out to the badge's ring.
+        const R = (Math.max(w, h) / 2 + 12) * wipe, feather = 46;
+        const m = g.createRadialGradient(fx.width / 2, fx.height / 2, Math.max(0, R - feather), fx.width / 2, fx.height / 2, R + 1);
+        m.addColorStop(0, 'rgba(0,0,0,1)');
+        m.addColorStop(1, 'rgba(0,0,0,0)');
+        g.globalCompositeOperation = 'destination-in';
+        g.fillStyle = m;
+        g.fillRect(0, 0, fx.width, fx.height);
+        g.globalCompositeOperation = 'source-over';
+      } else if (wipe < 1) {
         // Soft-edged horizontal wipe opening from the centre line.
         const half = (w / 2 + pad) * wipe, feather = 60;
         const m = g.createLinearGradient(fx.width / 2 - half - feather, 0, fx.width / 2 + half + feather, 0);
@@ -847,14 +890,24 @@
       ctx.globalAlpha = alpha;
       ctx.drawImage(fx, CX - dw / 2, CY - dh / 2, dw, dh);
       ctx.globalAlpha = 1;
+      if (logo.round && wipe < 1) {
+        // A ring of light rides the iris edge out to the badge's gold ring.
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.strokeStyle = rgba(GOLD_LIGHT, 0.85 * (1 - wipe * wipe));
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(CX, CY, Math.max(0, (Math.max(w, h) / 2 + 12) * wipe * scale - 18), 0, TAU);
+        ctx.stroke();
+        ctx.globalCompositeOperation = 'source-over';
+      }
     }
 
-    // One light glint across the letters, finished well before the hold.
+    // One light glint across the type and gold, finished well before the hold.
     const gp = prog(t, 5.85, 6.3);
     if (gp > 0 && gp < 1) {
       const g = fx.getContext('2d');
       g.clearRect(0, 0, fx.width, fx.height);
-      g.drawImage(logo.canvas, pad, pad);
+      g.drawImage(logo.hi, pad, pad);
       g.globalCompositeOperation = 'source-in';
       const bx = lerp(pad - 200, pad + w + 200, ease.inOutCubic(gp));
       const band = g.createLinearGradient(bx - 120, 0, bx + 120, h * 0.6);
@@ -882,7 +935,7 @@
     while (FINAL_DUST.length < 26) {
       const a = r() * TAU, d = R * (0.7 + r() * 1.0);
       const x = Math.cos(a) * d, y = Math.sin(a) * d;
-      if (Math.abs(x) < hx && Math.abs(y) < hy) continue;
+      if (logo.round ? Math.hypot(x, y) < logo.w / 2 + 34 : Math.abs(x) < hx && Math.abs(y) < hy) continue;
       if (Math.abs(x) > W / 2 - 50 || Math.abs(y) > H / 2 - 260) continue;
       FINAL_DUST.push({ x, y, size: 0.8 + r() * 1.6, a: 0.16 + r() * 0.3 });
     }

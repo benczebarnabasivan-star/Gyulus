@@ -55,12 +55,13 @@ async function main() {
   const info = await page.evaluate(src => window.APROBETU.setup({ src }), toDataUrl(logo.file));
   const duration = await page.evaluate(() => window.APROBETU.DURATION);
 
-  console.log(`logo: ${path.relative(ROOT, logo.file)} -> ${info.width}x${info.height}px on screen, ring radius ${info.ringRadius}px`);
+  console.log(`logo: ${path.relative(ROOT, logo.file)} -> ${info.width}x${info.height}px on screen` +
+    `${info.round ? ' (round badge)' : ''}, star ring radius ${info.ringRadius}px`);
   if (!info.isSvg && info.upscale > 1.01) {
     console.warn(`! The logo image is small and is being upscaled ${info.upscale.toFixed(2)}x. ` +
       'Use an SVG or a PNG at least ' + Math.ceil(info.sourceWidth * info.upscale) + 'px wide for a sharp result.');
   }
-  if (info.luminance < 0.22) {
+  if (!info.round && info.luminance < 0.22) {
     console.warn('! The logo is mostly dark and the background is dark navy: use the light/inverted version of the logo.');
   }
 
@@ -96,7 +97,7 @@ async function main() {
     '-map', '0:v',
     '-vf', 'scale=out_color_matrix=bt709:out_range=tv:flags=accurate_rnd+full_chroma_int,format=yuv420p',
     '-c:v', 'libx264', '-preset', 'slow', '-crf', '14', '-profile:v', 'high', '-level', '4.2',
-    '-g', String(fps), '-bf', '2',
+    '-g', String(fps * 10), '-bf', '2', // long GOP: no scheduled keyframe pops inside the static hold
     '-colorspace', 'bt709', '-color_primaries', 'bt709', '-color_trc', 'bt709', '-color_range', 'tv',
   );
   if (args.audio) ff.push('-map', '1:a', '-c:a', 'aac', '-b:a', '320k', '-ar', '48000');
